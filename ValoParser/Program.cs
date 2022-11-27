@@ -57,6 +57,7 @@ namespace ValoParser
                 }
                 Battlepass.parse();
                 Equippables.weapons();
+                Console.WriteLine("Valorant bas been successfully parsed!");
             } else
             {
                 Console.Error.WriteLine(String.Format("Path does not exist!"));

@@ -50,7 +50,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/displayicon.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/displayicon.png");
                                 dataObject.Add("displayIcon", "https://media.empressival.com/weapons/" + uuid + "/displayicon.png");
                             }
                             else
@@ -62,7 +62,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/fullrender.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/fullrender.png");
                                 dataObject.Add("fullRender", "https://media.empressival.com/weapons/" + uuid + "/fullrender.png");
                             }
                             else
@@ -75,7 +75,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/swatch.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/swatch.png");
                                 dataObject.Add("swatch", "https://media.empressival.com/weapons/" + uuid + "/swatch.png");
                             }
                             else
@@ -160,7 +160,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/displayicon.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/displayicon.png");
                                 dataObject.Add("displayIcon", "https://media.empressival.com/weapons/" + uuid + "/displayicon.png");
                             }
                             else
@@ -172,7 +172,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/fullrender.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/fullrender.png");
                                 dataObject.Add("fullRender", "https://media.empressival.com/weapons/" + uuid + "/fullrender.png");
                             }
                             else
@@ -185,7 +185,7 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "images/weapons/" + uuid + "/swatch.png");
+                                parser.Parse(split, "assets/weapons/" + uuid + "/swatch.png");
                                 dataObject.Add("swatch", "https://media.empressival.com/weapons/" + uuid + "/swatch.png");
                             }
                             else
@@ -251,9 +251,9 @@ namespace ValoParser
                 provider.LoadLocalization(lang);
                 var output = Regex.Replace(Regex.Unescape(getLanguageStrings(jsonArray, jsonObject).ToJsonString()), @"\r\n?|\n", "\\n");
                 File.WriteAllText(String.Format(@"./files/weapons/Weapons_{0}.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
-                Console.WriteLine(String.Format("Successfully parsed weapons {0}!", provider.GetLanguageCode(lang)));
+                Console.WriteLine(String.Format("Weapons data for language {0} has been successfully parsed!", provider.GetLanguageCode(lang)));
             }
-            Console.WriteLine("Equippables data has been parsed successfully!");
+            Console.WriteLine("Equippables data has been successfully parsed!");
         }
 
         private static JsonObject getLanguageStrings(JsonArray jsonArray, JsonObject jsonObject)
