@@ -55,7 +55,7 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("files");
                 }
-                Battlepass.parse();
+                Battlepass.Parse();
                 Equippables.weapons();
                 Console.WriteLine("Valorant bas been successfully parsed!");
             } else

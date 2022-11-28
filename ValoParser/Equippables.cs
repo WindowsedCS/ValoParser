@@ -250,7 +250,11 @@ namespace ValoParser
             {
                 provider.LoadLocalization(lang);
                 var output = Regex.Replace(Regex.Unescape(getLanguageStrings(jsonArray, jsonObject).ToJsonString()), @"\r\n?|\n", "\\n");
-                File.WriteAllText(String.Format(@"./files/weapons/Weapons_{0}.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
+                File.WriteAllText(String.Format(@"./files/weapons/weapons_{0}.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
+                if (provider.GetLanguageCode(lang) == "en-US")
+                {
+                    File.WriteAllText(String.Format(@"./files/weapons.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
+                }
                 Console.WriteLine(String.Format("Weapons data for language {0} has been successfully parsed!", provider.GetLanguageCode(lang)));
             }
             Console.WriteLine("Equippables data has been successfully parsed!");
