@@ -118,10 +118,10 @@ namespace ValoParser
                     obj.Add("uuid", uuid);
                     obj.Add("level", level);
                     obj.Add("type", itemPath["Properties"].AsObject().Select(p => p.Key).ToArray()[0].ToString());
-                    obj.Add("XP", int.Parse(item1["XP"].ToString()));
-                    obj.Add("VPCost", int.Parse(item1["VPCost"].ToString()));
-                    obj.Add("bPurchasableWithVP", bool.Parse(item1["bPurchasableWithVP"].ToString()));
-                    obj.Add("bIsEpilogue", bool.Parse(item["bIsEpilogue"].ToString()));
+                    obj.Add("xp", int.Parse(item1["XP"].ToString()));
+                    obj.Add("vpCost", int.Parse(item1["VPCost"].ToString()));
+                    obj.Add("purchasableWithVP", bool.Parse(item1["bPurchasableWithVP"].ToString()));
+                    obj.Add("isEpilogue", bool.Parse(item["bIsEpilogue"].ToString()));
                     obj.Add("isFree", false);
                     itemArray.Add(obj);
                 }
@@ -139,7 +139,12 @@ namespace ValoParser
 
                     JsonObject obj = new JsonObject();
                     obj.Add("uuid", uuid);
+                    obj.Add("level", null);
                     obj.Add("type", itemPath["Properties"].AsObject().Select(p => p.Key).ToArray()[0].ToString());
+                    obj.Add("xp", null);
+                    obj.Add("vpCost", null);
+                    obj.Add("purchasableWithVP", false);
+                    obj.Add("isEpilogue", false);
                     obj.Add("isFree", true);
                     itemArray.Add(obj);
                 }
