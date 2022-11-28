@@ -15,7 +15,7 @@ namespace ValoParser
         public static void weapons()
         {
             var provider = Program.provider;
-            Console.WriteLine(String.Format("Parsing weapons data and images..."));
+            Console.WriteLine(String.Format("Parsing weapons data and assets..."));
             if (!Directory.Exists(@"./files/weapons"))
             {
                 Directory.CreateDirectory("./files/weapons");
@@ -50,8 +50,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/displayicon.png");
-                                dataObject.Add("displayIcon", "https://media.empressival.com/weapons/" + uuid + "/displayicon.png");
+                                parser.Parse(split, "weapons/" + uuid + "/displayicon.png");
+                                dataObject.Add("displayIcon", "https://assets.empressival.com/weapons/" + uuid + "/displayicon.png");
                             }
                             else
                             {
@@ -62,8 +62,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/fullrender.png");
-                                dataObject.Add("fullRender", "https://media.empressival.com/weapons/" + uuid + "/fullrender.png");
+                                parser.Parse(split, "weapons/" + uuid + "/fullrender.png");
+                                dataObject.Add("fullRender", "https://assets.empressival.com/weapons/" + uuid + "/fullrender.png");
                             }
                             else
                             {
@@ -75,8 +75,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/swatch.png");
-                                dataObject.Add("swatch", "https://media.empressival.com/weapons/" + uuid + "/swatch.png");
+                                parser.Parse(split, "weapons/" + uuid + "/swatch.png");
+                                dataObject.Add("swatch", "https://assets.empressival.com/weapons/" + uuid + "/swatch.png");
                             }
                             else
                             {
@@ -160,8 +160,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/displayicon.png");
-                                dataObject.Add("displayIcon", "https://media.empressival.com/weapons/" + uuid + "/displayicon.png");
+                                parser.Parse(split, "weapons/" + uuid + "/displayicon.png");
+                                dataObject.Add("displayIcon", "https://assets.empressival.com/weapons/" + uuid + "/displayicon.png");
                             }
                             else
                             {
@@ -172,8 +172,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/fullrender.png");
-                                dataObject.Add("fullRender", "https://media.empressival.com/weapons/" + uuid + "/fullrender.png");
+                                parser.Parse(split, "weapons/" + uuid + "/fullrender.png");
+                                dataObject.Add("fullRender", "https://assets.empressival.com/weapons/" + uuid + "/fullrender.png");
                             }
                             else
                             {
@@ -185,8 +185,8 @@ namespace ValoParser
                                 String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                                 var split = path.Split(".")[0];
                                 ImageParser parser = new ImageParser();
-                                parser.Parse(split, "assets/weapons/" + uuid + "/swatch.png");
-                                dataObject.Add("swatch", "https://media.empressival.com/weapons/" + uuid + "/swatch.png");
+                                parser.Parse(split, "weapons/" + uuid + "/swatch.png");
+                                dataObject.Add("swatch", "https://assets.empressival.com/weapons/" + uuid + "/swatch.png");
                             }
                             else
                             {
