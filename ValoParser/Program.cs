@@ -57,7 +57,13 @@ namespace ValoParser
                 }
                 Battlepass.Parse();
                 Equippables.weapons();
-                Console.WriteLine("Valorant bas been successfully parsed!");
+                foreach (var lang in languageCodes)
+                {
+                    provider.LoadLocalization(lang);
+                    Equippables.Localization(lang);
+                    Battlepass.Localization(lang);
+                }
+                Console.WriteLine("VALORANT bas been successfully parsed!");
             } else
             {
                 Console.Error.WriteLine(String.Format("Path does not exist!"));

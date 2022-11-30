@@ -12,6 +12,10 @@ namespace ValoParser
 {
     public static class Equippables
     {
+
+        private static JsonArray jsonArray;
+        private static JsonObject jsonObject;
+
         public static void weapons()
         {
             var provider = Program.provider;
@@ -246,28 +250,26 @@ namespace ValoParser
                     }
                 }
             }
-            foreach (var lang in Program.languageCodes)
-            {
-                provider.LoadLocalization(lang);
-                var output = Regex.Replace(Regex.Unescape(getLanguageStrings(jsonArray, jsonObject).ToJsonString()), @"\r\n?|\n", "\\n");
-                File.WriteAllText(String.Format(@"./files/weapons/weapons_{0}.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
-                if (provider.GetLanguageCode(lang) == "en-US")
-                {
-                    File.WriteAllText(String.Format(@"./files/weapons.json", provider.GetLanguageCode(lang)), output, Encoding.UTF8);
-                }
-                Console.WriteLine(String.Format("Weapons data for language {0} has been successfully parsed!", provider.GetLanguageCode(lang)));
-            }
+            Equippables.jsonArray = jsonArray;
+            Equippables.jsonObject = jsonObject;
             Console.WriteLine("Equippables data has been successfully parsed!");
         }
 
-        private static JsonObject getLanguageStrings(JsonArray jsonArray, JsonObject jsonObject)
+        public static void Localization(ELanguage lang)
+        {
+            var output = Regex.Replace(Regex.Unescape(GetLanguageStrings(jsonArray, jsonObject).ToJsonString()), @"\r\n?|\n", "\\n").Replace(@"//MARK_", "\\\"");
+            File.WriteAllText(String.Format(@"./files/weapons/{0}.json", Program.provider.GetLanguageCode(lang)), output, Encoding.UTF8);
+            Console.WriteLine(String.Format("Successfully saved weapons in {0}!", Program.provider.GetLanguageCode(lang)));
+        }
+
+        private static JsonObject GetLanguageStrings(JsonArray jsonArray, JsonObject jsonObject)
         {
             JsonObject languageStrings = new JsonObject();
             for (var i = 0; i < jsonArray.Count; i++)
             {
                 var uuid = jsonArray[i]["uuid"].ToString();
                 string localized = Program.provider.GetLocalizedString(jsonArray[i]["namespacee"].ToString(), jsonArray[i]["key"].ToString(), jsonArray[i]["defaultValue"].ToString());
-                jsonObject[uuid]["displayName"] = localized;
+                jsonObject[uuid]["displayName"] = localized.Replace(@"""", "//MARK_");
                 languageStrings.Add(uuid, jsonObject[uuid].Deserialize<JsonNode>());
             }
             return languageStrings;
