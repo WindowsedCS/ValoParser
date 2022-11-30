@@ -16,6 +16,7 @@ using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse_Conversion.Textures;
 using System.Text;
 using System.Text.RegularExpressions;
+using static CUE4Parse.UE4.Objects.Core.i18N.FTextHistory;
 
 namespace ValoParser
 {
@@ -69,8 +70,8 @@ namespace ValoParser
             long endTime = Int64.Parse(json["StartTime"]["Ticks"].ToString());
             var returnJson = JsonNode.Parse("{}");
             returnJson["type"] = type;
-            returnJson["startTime"] = startTime;
-            returnJson["endTime"] = endTime;
+            returnJson["startTime"] = new DateTime(startTime).GetDateTimeFormats('s')[0].ToString();
+            returnJson["endTime"] = new DateTime(endTime).GetDateTimeFormats('s')[0].ToString();
 
             return returnJson;
         }
