@@ -67,11 +67,11 @@ namespace ValoParser
             JsonNode json = jsonNode[1]["Properties"];
             String type = json["Type"] != null ? json["Type"].ToString() : "CB";
             long startTime = Int64.Parse(json["StartTime"]["Ticks"].ToString());
-            long endTime = Int64.Parse(json["StartTime"]["Ticks"].ToString());
+            long endTime = Int64.Parse(json["EndTime"]["Ticks"].ToString());
             var returnJson = JsonNode.Parse("{}");
             returnJson["type"] = type;
-            returnJson["startTime"] = new DateTime(startTime).GetDateTimeFormats('s')[0].ToString();
-            returnJson["endTime"] = new DateTime(endTime).GetDateTimeFormats('s')[0].ToString();
+            returnJson["startTime"] = new DateTime(startTime).GetDateTimeFormats('s')[0].ToString() + ".000Z";
+            returnJson["endTime"] = new DateTime(endTime).GetDateTimeFormats('s')[0].ToString() + ".000Z";
 
             return returnJson;
         }
