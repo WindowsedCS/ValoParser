@@ -21,6 +21,7 @@ async function updateRiotClientManifest() {
                     file.on("finish", () => {
                         file.close();
                         fs.renameSync(`./${item.split("/").pop()}`, './ritoclient.manifest');
+                        console.log("Riot Client manifest has been successfully updated!");
                         parseRiotClientManifest(item.split("/").pop());
                     });
                 });
@@ -34,16 +35,18 @@ async function parseRiotClientManifest(manifest) {
         fs.renameSync(`./${manifest.replace(".manifest", ".json")}`, './ritoclient.json')
         let json = fs.readFileSync("./ritoclient.json");
         json = JSON.parse(json);
+        console.log("Riot Client manifest has been successfully parsed!");
         updateRiotClient(json["files"].pop()["path"], "./ritoclient.manifest")
     })
 }
 async function updateRiotClient(lastFile, manifest) {
     let finished = false;
-    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://ks-foundation.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", "./Game/RiotClient"]);
+    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://ks-foundation.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", "./Game/Riot Client"]);
     downloader.stdout.on('data', async (data) => {
         if (data.toString("utf8").includes(lastFile)) {
             if (!finished) {
                 finished = true;
+                console.log("Riot Client has been successfully updated!");
             }
         } else {
             console.log(data.toString("utf8"));
@@ -66,7 +69,7 @@ async function updateGame(lastFile, manifest) {
         if (data.toString("utf8").includes(lastFile)) {
             if (!finished) {
                 finished = true;
-                console.log("Game files has been successfully updated!");
+                console.log("VALORANT has been successfully updated!");
                 parseAssets();
             }
         } else {
@@ -79,7 +82,6 @@ async function updateGame(lastFile, manifest) {
         }
     })
 }
-
 async function parseAssets() {
     const parser = spawn("./tools/ValoParser.exe", ["./Game/VALORANT"]);
     parser.stdout.on('data', async (data) => {
@@ -88,12 +90,11 @@ async function parseAssets() {
     parser.on("exit", async (data) => {
         fs.rename(`./manifest.json`, './files/manifest.json', function(err) {
             if (!err) {
-                console.log("API data has been successfully updated!");
+                parseVersion();
             }
         });
     })
 }
-
 async function parseManifest(manifest) {
     const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "--print-manifest"]);
     downloader.on("exit", async (data) => {
@@ -102,7 +103,7 @@ async function parseManifest(manifest) {
                 fs.rename(`./${manifest.replace(".manifest", ".json")}`, './Game/VALORANT.json', function(err) {
                     if (!err) {
                         let json = JSON.parse(data);
-                        console.log("Mainfest has been successfully parsed!");
+                        console.log("VALORANT manifest has been successfully parsed!");
                         updateGame(json.files[json.files.length - 1].path, manifest);
                     }
                 });
@@ -110,7 +111,6 @@ async function parseManifest(manifest) {
         })
     })
 }
-
 async function updateManifest() {
     https.get("https://clientconfig.rpg.riotgames.com/api/v1/config/public?namespace=keystone.products.valorant.patchlines", async function(config) {
         config.setEncoding("utf8");
@@ -129,7 +129,7 @@ async function updateManifest() {
                             res.pipe(file);
                             file.on("finish", () => {
                                 file.close();
-                                console.log("Mainfest has been successfully updated!");
+                                console.log("VALORANT manifest has been successfully updated!");
                                 parseManifest(item["patch_url"].split("/").pop());
                             });
                         });
@@ -138,6 +138,16 @@ async function updateManifest() {
             }
         });
     })
+}
+
+//Overall
+async function parseVersion() {
+    const downloader = spawn("python ./tools/VersionParser.py", ["./Game"]);
+    downloader.stdout.on('data', async (data) => {
+        let json = JSON.parse(data.toString("utf8"));
+        fs.writeFileSync("./files/version.json", JSON.stringify(json));
+        console.log("API data has been successfully updated!");
+    });
 }
 
 updateRiotClientManifest();
