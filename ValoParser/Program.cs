@@ -49,7 +49,9 @@ namespace ValoParser
             provider.Initialize();
             provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
 
-            if (Directory.Exists(gameDirectory))
+            VersionParser.Parse();
+
+            /*if (Directory.Exists(gameDirectory))
             {
                 if (!Directory.Exists(@"./files"))
                 {
@@ -67,7 +69,7 @@ namespace ValoParser
             } else
             {
                 Console.Error.WriteLine(String.Format("Path does not exist!"));
-            }
+            }*/
         }
     }
 }
