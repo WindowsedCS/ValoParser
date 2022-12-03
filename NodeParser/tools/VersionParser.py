@@ -18,7 +18,7 @@ json1 = {
 
 resJson = {}
 
-def get_valorant_version(path = "{0}/VALORANT/ShooterGame/Binaries/Win64/VALORANT-Win64-Shipping.exe".format(sys.argv[1])):
+def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-Shipping.exe".format(sys.argv[1])):
     with open(path, "rb") as exe_file:
         data = exe_file.read()
         # VALORANT Branch
@@ -47,7 +47,7 @@ def get_valorant_version(path = "{0}/VALORANT/ShooterGame/Binaries/Win64/VALORAN
         buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(year, json1[month], day)
         resJson["buildDate"] = buildDate
 
-def get_riot_client_version(path = "{0}/Riot Client/RiotClientServices.exe".format(sys.argv[1]), path1 = "{0}/Riot Client/RiotGamesApi.dll".format(sys.argv[1])):
+def get_riot_client_version(path = "{0}/RiotClientServices.exe".format(sys.argv[2]), path1 = "{0}/RiotGamesApi.dll".format(sys.argv[2])):
     with open(path, "rb") as exe_file:
         # Riot Client Build
         data = exe_file.read()

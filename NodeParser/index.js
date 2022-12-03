@@ -2,6 +2,7 @@ const spawn = require("child_process").spawn;
 const fs = require("fs");
 const path = require("path");
 const https = require('https');
+const dataConfig = require("./config.json");
 
 //Riot Client
 async function updateRiotClientManifest() {
@@ -40,7 +41,7 @@ async function parseRiotClientManifest(manifest) {
 }
 async function updateRiotClient(lastFile, manifest) {
     let finished = false;
-    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://ks-foundation.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", "./Game/Riot Client"]);
+    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://ks-foundation.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", `${dataConfig.path.RiotClient}`]);
     downloader.stdout.on('data', async (data) => {
         if (data.toString("utf8").includes(lastFile)) {
             if (!finished) {
@@ -63,7 +64,7 @@ async function updateRiotClient(lastFile, manifest) {
 //VALORANT
 async function updateGame(lastFile, manifest) {
     let finished = false;
-    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://valorant.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", "./Game/VALORANT"]);
+    const downloader = spawn("./tools/ManifestDownloader.exe", [manifest, "-b", "https://valorant.secure.dyn.riotcdn.net/channels/public/bundles", "-t", "8", "-o", `${dataConfig.path.VALORANT}`]);
     downloader.stdout.on('data', async (data) => {
         if (data.toString("utf8").includes(lastFile)) {
             if (!finished) {
@@ -82,7 +83,7 @@ async function updateGame(lastFile, manifest) {
     })
 }
 async function parseAssets() {
-    const parser = spawn("./tools/ValoParser.exe", ["./Game/VALORANT"]);
+    const parser = spawn("./tools/ValoParser.exe", [`${dataConfig.path.VALORANT}`]);
     parser.stdout.on('data', async (data) => {
         console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
@@ -140,7 +141,7 @@ async function updateManifest() {
 
 //Overall
 async function parseVersion() {
-    const downloader = spawn("python", ["./tools/VersionParser.py", "./Game"]);
+    const downloader = spawn("python", ["./tools/VersionParser.py", `${dataConfig.path.VALORANT}`, `${dataConfig.path.RiotClient}`]);
     downloader.stdout.on('data', async (data) => {
         console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
@@ -149,4 +150,7 @@ async function parseVersion() {
     })
 }
 
+setInterval(() => {
+    updateRiotClientManifest();
+}, 300000)
 updateRiotClientManifest();
