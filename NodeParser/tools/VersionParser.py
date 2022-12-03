@@ -1,6 +1,7 @@
 import sys
+import json
 
-json = {
+json1 = {
     "Jan": 1,
     "Feb": 2,
     "Mar": 3,
@@ -17,7 +18,7 @@ json = {
 
 resJson = {}
 
-def get_valorant_version(path = "{0}/VALORANT/ShooterGame/Binaries/Win64/VALORANT-Win64-Shipping.exe".format(sys.argv[0])):
+def get_valorant_version(path = "{0}/VALORANT/ShooterGame/Binaries/Win64/VALORANT-Win64-Shipping.exe".format(sys.argv[1])):
     with open(path, "rb") as exe_file:
         data = exe_file.read()
         # VALORANT Branch
@@ -43,10 +44,10 @@ def get_valorant_version(path = "{0}/VALORANT/ShooterGame/Binaries/Win64/VALORAN
         month =  data[pos:pos+6].decode("utf-16le").rstrip("\x00")
         day =  data[pos+8:pos+12].decode("utf-16le").rstrip("\x00")
         year =  data[pos+14:pos+22].decode("utf-16le").rstrip("\x00")
-        buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(year, json[month], day)
+        buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(year, json1[month], day)
         resJson["buildDate"] = buildDate
 
-def get_riot_client_version(path = "{0}/Riot Client/RiotClientServices.exe".format(sys.argv[0]), path1 = "{0}/Riot Client/RiotGamesApi.dll".format(sys.argv[0])):
+def get_riot_client_version(path = "{0}/Riot Client/RiotClientServices.exe".format(sys.argv[1]), path1 = "{0}/Riot Client/RiotGamesApi.dll".format(sys.argv[1])):
     with open(path, "rb") as exe_file:
         # Riot Client Build
         data = exe_file.read()
@@ -60,6 +61,10 @@ def get_riot_client_version(path = "{0}/Riot Client/RiotClientServices.exe".form
             pos = data.find(pattern) + len(pattern) + 20
             riotClientBuild = riotClientVersion + "." + data[pos:pos+14].decode("utf-16le").rstrip("\x00")
             resJson["riotClientBuild"] = riotClientBuild
+            save_json()
+
+def save_json():
+    with open("./files/version.json", "w") as outfile:
+        json.dump(resJson, outfile)
 
 get_valorant_version()
-print(resJson)

@@ -20,7 +20,6 @@ async function updateRiotClientManifest() {
                     res.pipe(file);
                     file.on("finish", () => {
                         file.close();
-                        fs.renameSync(`./${item.split("/").pop()}`, './ritoclient.manifest');
                         console.log("Riot Client manifest has been successfully updated!");
                         parseRiotClientManifest(item.split("/").pop());
                     });
@@ -30,13 +29,13 @@ async function updateRiotClientManifest() {
     })
 }
 async function parseRiotClientManifest(manifest) {
-    const downloader = spawn("./tools/ManifestDownloader.exe", ["./ritoclient.manifest", "--print-manifest"]);
+    const downloader = spawn("./tools/ManifestDownloader.exe", [`./${manifest}`, "--print-manifest"]);
     downloader.on("exit", async (data) => {
-        fs.renameSync(`./${manifest.replace(".manifest", ".json")}`, './ritoclient.json')
-        let json = fs.readFileSync("./ritoclient.json");
+        fs.renameSync(`./${manifest.replace(".manifest", ".json")}`, './RiotClient.json')
+        let json = fs.readFileSync("./RiotClient.json");
         json = JSON.parse(json);
         console.log("Riot Client manifest has been successfully parsed!");
-        updateRiotClient(json["files"].pop()["path"], "./ritoclient.manifest")
+        updateRiotClient(json["files"].pop()["path"], `./${manifest}`)
     })
 }
 async function updateRiotClient(lastFile, manifest) {
@@ -85,14 +84,13 @@ async function updateGame(lastFile, manifest) {
 async function parseAssets() {
     const parser = spawn("./tools/ValoParser.exe", ["./Game/VALORANT"]);
     parser.stdout.on('data', async (data) => {
-        console.log(`${data.toString("utf8").replaceLast("\n", "")}`);
+        console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
     parser.on("exit", async (data) => {
-        fs.rename(`./manifest.json`, './files/manifest.json', function(err) {
-            if (!err) {
-                parseVersion();
-            }
-        });
+        if (!fs.existsSync("./files/manifest")) fs.mkdirSync("./files/manifest");
+        fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
+        fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
+        parseVersion();
     })
 }
 async function parseManifest(manifest) {
@@ -100,7 +98,7 @@ async function parseManifest(manifest) {
     downloader.on("exit", async (data) => {
         fs.readFile(path.resolve(__dirname, manifest.replace(".manifest", ".json")),"utf-8", function(err, data) {
             if(!err) {
-                fs.rename(`./${manifest.replace(".manifest", ".json")}`, './Game/VALORANT.json', function(err) {
+                fs.rename(`./${manifest.replace(".manifest", ".json")}`, './VALORANT.json', function(err) {
                     if (!err) {
                         let json = JSON.parse(data);
                         console.log("VALORANT manifest has been successfully parsed!");
@@ -142,12 +140,13 @@ async function updateManifest() {
 
 //Overall
 async function parseVersion() {
-    const downloader = spawn("python ./tools/VersionParser.py", ["./Game"]);
+    const downloader = spawn("python", ["./tools/VersionParser.py", "./Game"]);
     downloader.stdout.on('data', async (data) => {
-        let json = JSON.parse(data.toString("utf8"));
-        fs.writeFileSync("./files/version.json", JSON.stringify(json));
-        console.log("API data has been successfully updated!");
+        console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
+    downloader.on("exit", async (data) => {
+        console.log("API data has been successfully updated!");
+    })
 }
 
 updateRiotClientManifest();
