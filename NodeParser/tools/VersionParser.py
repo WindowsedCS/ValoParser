@@ -20,6 +20,11 @@ resJson = {}
 
 def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-Shipping.exe".format(sys.argv[1])):
     with open(path, "rb") as exe_file:
+        # Manifest ID
+        file = open('./files/manifest/VALORANT.json')
+        manifest = json.load(file)
+        resJson["manifestId"] = manifest["Manifest ID"]
+        # Parse EXE file
         data = exe_file.read()
         # VALORANT Branch
         pattern = "++Ares-Core+release-".encode("utf-16le")

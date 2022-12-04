@@ -1,4 +1,5 @@
 const spawn = require("child_process").spawn;
+const exec = require("child_process").exec;
 const fs = require("fs");
 const path = require("path");
 const https = require('https');
@@ -147,6 +148,23 @@ async function parseVersion() {
     });
     downloader.on("exit", async (data) => {
         console.log("API data has been successfully updated!");
+        gitCommit();
+    })
+}
+
+//Git Commit
+async function gitCommit() {
+    const gitAdd = spawn("git", ["add", "-A"], {cwd: "./files/"});
+    gitAdd.on("exit", async () => {
+        let version = fs.readFileSync("./files/version.json", "utf8");
+        json = JSON.parse(version);
+        const gitCommitt = spawn("git", ["commit", "-m", `${json["riotClientVersion"]}`], {cwd: "./files/"});
+        gitCommitt.on("exit", async () => {
+            const gitPush = spawn("git", ["push", "-u", "origin", "main"], {cwd: "./files/"});
+            gitPush.on("exit", async () => {
+                console.log("GitHub Repository has been successfully pushed!");
+            })
+        })
     })
 }
 
