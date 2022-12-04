@@ -24,38 +24,32 @@ namespace ValoParser
     {
 
         static JsonObject jsonObject = new JsonObject();
-        public static void Parse()
+        public static void Parse(GameFile file)
         {
-            Console.WriteLine("Parsing battlepass data...");
             var provider = Program.provider;
-            var jsonObject = new JsonObject();
-            foreach (var file in provider.Files.Values)
+            if (file.Path.StartsWith("ShooterGame/Content/Contracts/Story/") && file.Path.EndsWith("_DataAssetV2.uasset"))
             {
-                if (file.Path.StartsWith("ShooterGame/Content/Contracts/Story/") && file.Path.EndsWith("_DataAssetV2.uasset"))
+                if (Program.logDetailed) Console.WriteLine(String.Format("Parsing battlepass season \"{0}\"...", file.Name.Replace("_DataAssetV2.uasset", "")));
+
+                var allExports = provider.LoadObjectExports(file.Path);
+                var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
+                var jsonNode = JsonNode.Parse(fullJson);
+                JsonNode json = jsonNode[2]["Properties"];
+                var output = GetBattlePassSeason(json["Season"]["AssetPathName"].ToString());
+                output.AsObject().Add("displayName", GetDisplayNamePath(jsonNode[1]["Properties"]["UIData"]["AssetPathName"].ToString()));
+                output.AsObject().Add("freeRewardScheduleID", UuidParser.Parse(jsonNode[1]["Properties"]["FreeRewardScheduleID"].ToString()));
+                output.AsObject().Add("levels", getBattlePassChapters(jsonNode));
+
+                var uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
+
+                if (!Directory.Exists(@"./files/battlepass"))
                 {
-                    if (Program.logDetailed) Console.WriteLine(String.Format("Parsing battlepass season \"{0}\"...", file.Name.Replace("_DataAssetV2.uasset", "")));
-                    
-                    var allExports = provider.LoadObjectExports(file.Path);
-                    var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
-                    var jsonNode = JsonNode.Parse(fullJson);
-                    JsonNode json = jsonNode[2]["Properties"];
-                    var output = GetBattlePassSeason(json["Season"]["AssetPathName"].ToString());
-                    output.AsObject().Add("displayName", GetDisplayNamePath(jsonNode[1]["Properties"]["UIData"]["AssetPathName"].ToString()));
-                    output.AsObject().Add("freeRewardScheduleID", UuidParser.Parse(jsonNode[1]["Properties"]["FreeRewardScheduleID"].ToString()));
-                    output.AsObject().Add("levels", getBattlePassChapters(jsonNode));
-
-                    var uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
-
-                    if (!Directory.Exists(@"./files/battlepass"))
-                    {
-                        Directory.CreateDirectory("./files/battlepass");
-                    }
-                    
-                    jsonObject.Add(uuid, output);
-                    if (Program.logDetailed) Console.WriteLine(String.Format("Successfully parsed battlepass season \"{0}\"!", file.Name.Replace("_DataAssetV2.uasset", "")));
+                    Directory.CreateDirectory("./files/battlepass");
                 }
+
+                jsonObject.Add(uuid, output);
+                if (Program.logDetailed) Console.WriteLine(String.Format("Successfully parsed battlepass season \"{0}\"!", file.Name.Replace("_DataAssetV2.uasset", "")));
             }
-            Battlepass.jsonObject = jsonObject;
         }
 
         static JsonNode GetBattlePassSeason(String assetPathName)

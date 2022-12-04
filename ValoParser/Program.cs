@@ -49,20 +49,32 @@ namespace ValoParser
             provider.Initialize();
             provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
 
+            Console.WriteLine("Parsing game assets...");
             if (Directory.Exists(gameDirectory))
             {
+                //Check output directory
                 if (!Directory.Exists(@"./files"))
                 {
                     Directory.CreateDirectory("files");
                 }
-                Battlepass.Parse();
-                Equippables.weapons();
+                if (!Directory.Exists(@"./files/weapons"))
+                {
+                    Directory.CreateDirectory("./files/weapons");
+                }
+                //Parse game assets
+                foreach (var file in provider.Files.Values)
+                {
+                    Equippables.weapons(file);
+                    Battlepass.Parse(file);
+                }
+                //Parse localizations
                 foreach (var lang in languageCodes)
                 {
                     provider.LoadLocalization(lang);
                     Equippables.Localization(lang);
                     Battlepass.Localization(lang);
                 }
+
                 Console.WriteLine("VALORANT bas been successfully parsed!");
             } else
             {
