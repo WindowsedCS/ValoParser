@@ -41,7 +41,7 @@ namespace ValoParser
                     output.Add("tierRank", tierRank);
                 } else
                 {
-                    output.Add("tierRank", 0);
+                    output.Add("tierRank", "0");
                 }
                 output.Add("juiceValue", juiceValue);
                 output.Add("juiceCost", juiceCost);
