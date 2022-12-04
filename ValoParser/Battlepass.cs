@@ -1,22 +1,13 @@
 using System;
 using System.IO;
-using System.Text.Json;
-using System.Drawing;
-using System.Drawing.Imaging;
-using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
-using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
-using static System.Net.WebRequestMethods;
 using System.Text.Json.Nodes;
 using System.Linq;
 using File = System.IO.File;
-using CUE4Parse.UE4.Assets.Exports.Texture;
-using CUE4Parse_Conversion.Textures;
 using System.Text;
 using System.Text.RegularExpressions;
-using static CUE4Parse.UE4.Objects.Core.i18N.FTextHistory;
 
 namespace ValoParser
 {
@@ -41,11 +32,6 @@ namespace ValoParser
                 output.AsObject().Add("levels", getBattlePassChapters(jsonNode));
 
                 var uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
-
-                if (!Directory.Exists(@"./files/battlepass"))
-                {
-                    Directory.CreateDirectory("./files/battlepass");
-                }
 
                 jsonObject.Add(uuid, output);
                 if (Program.logDetailed) Console.WriteLine(String.Format("Successfully parsed battlepass season \"{0}\"!", file.Name.Replace("_DataAssetV2.uasset", "")));
