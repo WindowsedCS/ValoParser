@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using CUE4Parse.FileProvider;
 using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
@@ -11,20 +10,20 @@ using System.Text.RegularExpressions;
 
 namespace ValoParser
 {
-    public static class Battlepass
+    public static class Eventpass
     {
 
         static JsonObject jsonObject = new JsonObject();
         public static void Parse(GameFile file)
         {
             var provider = Program.provider;
-            if (file.Path.StartsWith("ShooterGame/Content/Contracts/Story/") && file.Path.EndsWith("_DataAssetV2.uasset"))
+            if (file.Path.StartsWith("ShooterGame/Content/Contracts/Events/") && file.Path.EndsWith("_DataAssetV2.uasset"))
             {
                 var allExports = provider.LoadObjectExports(file.Path);
                 var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                 var jsonNode = JsonNode.Parse(fullJson);
                 JsonNode json = jsonNode[2]["Properties"];
-                var output = GetBattlePassSeason(json["Season"]["AssetPathName"].ToString());
+                var output = GetBattlePassSeason(json["Event"]["AssetPathName"].ToString());
                 output.AsObject().Add("displayName", GetDisplayNamePath(jsonNode[1]["Properties"]["UIData"]["AssetPathName"].ToString()));
                 output.AsObject().Add("freeRewardScheduleID", UuidParser.Parse(jsonNode[1]["Properties"]["FreeRewardScheduleID"].ToString()));
                 output.AsObject().Add("levels", getBattlePassChapters(jsonNode));
@@ -42,11 +41,9 @@ namespace ValoParser
             var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
             var jsonNode = JsonNode.Parse(fullJson);
             JsonNode json = jsonNode[1]["Properties"];
-            String type = json["Type"] != null ? json["Type"].ToString() : "CB";
             long startTime = Int64.Parse(json["StartTime"]["Ticks"].ToString());
             long endTime = Int64.Parse(json["EndTime"]["Ticks"].ToString());
             var returnJson = JsonNode.Parse("{}");
-            returnJson["type"] = type;
             returnJson["startTime"] = new DateTime(startTime).GetDateTimeFormats('s')[0].ToString() + ".000Z";
             returnJson["endTime"] = new DateTime(endTime).GetDateTimeFormats('s')[0].ToString() + ".000Z";
 
@@ -102,31 +99,6 @@ namespace ValoParser
                     obj.Add("xp", int.Parse(item1["XP"].ToString()));
                     obj.Add("vpCost", int.Parse(item1["VPCost"].ToString()));
                     obj.Add("purchasableWithVP", bool.Parse(item1["bPurchasableWithVP"].ToString()));
-                    obj.Add("isEpilogue", bool.Parse(item["bIsEpilogue"].ToString()));
-                    obj.Add("isFree", false);
-                    itemArray.Add(obj);
-                }
-
-                foreach (var item1 in item["FreeChapterRewards"].AsArray())
-                {
-                    var itemPath = json[int.Parse(item1["ObjectPath"].ToString().Split(".")[1])];
-                    var assetPath = itemPath["Properties"].AsObject().Select(p => p.Value).ToArray()[0]["AssetPathName"].ToString().Split(".")[0];
-
-                    var allExports = provider.LoadObjectExports(assetPath.ToString());
-                    var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
-                    var jsonNode = JsonNode.Parse(fullJson);
-
-                    String uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
-
-                    JsonObject obj = new JsonObject();
-                    obj.Add("uuid", uuid);
-                    obj.Add("level", null);
-                    obj.Add("type", itemPath["Properties"].AsObject().Select(p => p.Key).ToArray()[0].ToString());
-                    obj.Add("xp", null);
-                    obj.Add("vpCost", null);
-                    obj.Add("purchasableWithVP", false);
-                    obj.Add("isEpilogue", false);
-                    obj.Add("isFree", true);
                     itemArray.Add(obj);
                 }
 
@@ -145,8 +117,8 @@ namespace ValoParser
                 var namespacee = all[1];
                 jsonObject.Select(p => p.Value).ToArray()[i]["displayName"] = Program.provider.GetLocalizedString(namespacee, key, all[2]).Replace(@"""", "//MARK_");
             }
-            File.WriteAllText(String.Format(@"./files/battlepass/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
-            Console.WriteLine(String.Format("Successfully saved battlepass in {0}!", Program.provider.GetLanguageCode(lang)));
+            File.WriteAllText(String.Format(@"./files/eventpass/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
+            Console.WriteLine(String.Format("Successfully saved eventpass in {0}!", Program.provider.GetLanguageCode(lang)));
             jsonObject = obj;
         }
     }

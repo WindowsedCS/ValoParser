@@ -65,6 +65,10 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./files/battlepass");
                 }
+                if (!Directory.Exists(@"./files/eventpass"))
+                {
+                    Directory.CreateDirectory("./files/eventpass");
+                }
                 if (!Directory.Exists(@"./files/contenttiers"))
                 {
                     Directory.CreateDirectory("./files/contenttiers");
@@ -75,6 +79,7 @@ namespace ValoParser
                     Equippables.weapons(file);
                     Battlepass.Parse(file);
                     ContentTiers.Parse(file);
+                    Eventpass.Parse(file);
                 }
                 //Parse localizations
                 foreach (var lang in languageCodes)
@@ -83,6 +88,7 @@ namespace ValoParser
                     Equippables.Localization(lang);
                     Battlepass.Localization(lang);
                     ContentTiers.Localization(lang);
+                    Eventpass.Localization(lang);
                 }
 
                 Console.WriteLine("VALORANT bas been successfully parsed!");

@@ -399,8 +399,8 @@ FodyWeavers.xsd
 *.idea
 
 NodeParser/*.manifest
-NodeParser/ritoclient.json
-NodeParser/valorant.json
 NodeParser/assets/
 NodeParser/files/
 NodeParser/Game/
+NodeParser/bak/
+NodeParser/tools/
