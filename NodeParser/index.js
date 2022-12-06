@@ -148,7 +148,7 @@ async function parseVersion() {
     });
     downloader.on("exit", async (data) => {
         console.log("API data has been successfully updated!");
-        // gitCommit();
+        gitCommit();
     })
 }
 
