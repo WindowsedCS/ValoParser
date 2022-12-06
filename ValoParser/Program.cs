@@ -3,11 +3,8 @@ using CUE4Parse.FileProvider;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
-using CUE4Parse_Conversion.Textures;
-using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace ValoParser
@@ -61,13 +58,9 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./files/weapons");
                 }
-                if (!Directory.Exists(@"./files/battlepass"))
+                if (!Directory.Exists(@"./files/contracts"))
                 {
-                    Directory.CreateDirectory("./files/battlepass");
-                }
-                if (!Directory.Exists(@"./files/eventpass"))
-                {
-                    Directory.CreateDirectory("./files/eventpass");
+                    Directory.CreateDirectory("./files/contracts");
                 }
                 if (!Directory.Exists(@"./files/contenttiers"))
                 {
@@ -77,18 +70,16 @@ namespace ValoParser
                 foreach (var file in provider.Files.Values)
                 {
                     Equippables.weapons(file);
-                    Battlepass.Parse(file);
+                    Contracts.Parse(file);
                     ContentTiers.Parse(file);
-                    Eventpass.Parse(file);
                 }
                 //Parse localizations
                 foreach (var lang in languageCodes)
                 {
                     provider.LoadLocalization(lang);
                     Equippables.Localization(lang);
-                    Battlepass.Localization(lang);
+                    Contracts.Localization(lang);
                     ContentTiers.Localization(lang);
-                    Eventpass.Localization(lang);
                 }
 
                 Console.WriteLine("VALORANT bas been successfully parsed!");
