@@ -1,11 +1,11 @@
 using CUE4Parse.Encryption.Aes;
 using CUE4Parse.FileProvider;
-using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Versions;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json.Nodes;
 
 namespace ValoParser
 {
@@ -14,6 +14,7 @@ namespace ValoParser
         public static bool logDetailed = false;
         private const string _aesKey = "0x4BE71AF2459CF83899EC9DC2CB60E22AC4B3047E0211034BBABE9D174C069DD6";
         public static DefaultFileProvider provider;
+        public static JsonObject version = JsonNode.Parse(File.ReadAllText("./version.json")).AsObject();
 
         public static List<ELanguage> languageCodes = new List<ELanguage>() {
             ELanguage.Arabic,

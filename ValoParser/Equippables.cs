@@ -89,7 +89,7 @@ namespace ValoParser
                             if (streamedVideo[1]["Properties"]["Uuid"] != null)
                             {
                                 var uuidVideo = streamedVideo[1]["Properties"]["Uuid"].ToString();
-                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", "release-05.10", UuidParser.Parse(uuidVideo));
+                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
                                 dataObject.Add("streamedVideo", link);
                             }
                             else
@@ -199,7 +199,7 @@ namespace ValoParser
                             if (streamedVideo[1]["Properties"]["Uuid"] != null)
                             {
                                 var uuidVideo = streamedVideo[1]["Properties"]["Uuid"].ToString();
-                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", "release-05.10", UuidParser.Parse(uuidVideo));
+                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
                                 dataObject.Add("streamedVideo", link);
                             }
                             else

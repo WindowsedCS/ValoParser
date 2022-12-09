@@ -90,8 +90,8 @@ async function parseAssets() {
     });
     parser.on("exit", async (data) => {
         if (!fs.existsSync("./files/manifest")) fs.mkdirSync("./files/manifest");
-        fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
-        fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
+        // fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
+        // fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
         parseVersion();
     })
 }
@@ -171,4 +171,4 @@ async function gitCommit() {
 setInterval(() => {
     updateRiotClientManifest();
 }, 300000)
-updateRiotClientManifest();
+parseAssets();
