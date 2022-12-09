@@ -56,8 +56,6 @@ async function updateRiotClient(lastFile, manifest) {
     downloader.on("exit", async (data) => {
         if (!finished) {
             updateRiotClient(lastFile, manifest);
-        } else {
-            updateManifest();
         }
     })
 }
@@ -71,7 +69,7 @@ async function updateGame(lastFile, manifest) {
             if (!finished) {
                 finished = true;
                 console.log("VALORANT has been successfully updated!");
-                parseAssets();
+                parseVersion();
             }
         } else {
             console.log(data.toString("utf8"));
@@ -89,10 +87,7 @@ async function parseAssets() {
         console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
     parser.on("exit", async (data) => {
-        if (!fs.existsSync("./files/manifest")) fs.mkdirSync("./files/manifest");
-        // fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
-        // fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
-        parseVersion();
+        gitCommit();
     })
 }
 async function parseManifest(manifest) {
@@ -142,13 +137,16 @@ async function updateManifest() {
 
 //Overall
 async function parseVersion() {
+    if (!fs.existsSync("./files/manifest")) fs.mkdirSync("./files/manifest");
+    fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
+    fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
     const downloader = spawn("python", ["./tools/VersionParser.py", `${dataConfig.path.VALORANT}`, `${dataConfig.path.RiotClient}`]);
     downloader.stdout.on('data', async (data) => {
         console.log(`${data.toString("utf8").replace("\n", "")}`);
     });
     downloader.on("exit", async (data) => {
-        console.log("API data has been successfully updated!");
-        gitCommit();
+        console.log("Version data has been successfully parsed!");
+        parseAssets();
     })
 }
 
@@ -170,5 +168,7 @@ async function gitCommit() {
 
 setInterval(() => {
     updateRiotClientManifest();
+    updateManifest();
 }, 300000)
-parseAssets();
+updateRiotClientManifest();
+updateManifest();
