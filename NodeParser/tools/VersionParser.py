@@ -50,7 +50,8 @@ def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-S
         day =  data[pos+8:pos+12].decode("utf-16le").rstrip("\x00")
         year =  data[pos+14:pos+22].decode("utf-16le").rstrip("\x00")
         buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(year, json1[month], day)
-        resJson["buildDate"] = buildDate
+        resJson["buildDate"] = buildDate.replace(" ", "0")
+        save_json()
 
 def get_riot_client_version(path = "{0}/RiotClientServices.exe".format(sys.argv[2]), path1 = "{0}/RiotGamesApi.dll".format(sys.argv[2])):
     with open(path, "rb") as exe_file:
@@ -66,7 +67,6 @@ def get_riot_client_version(path = "{0}/RiotClientServices.exe".format(sys.argv[
             pos = data.find(pattern) + len(pattern) + 20
             riotClientBuild = riotClientVersion + "." + data[pos:pos+14].decode("utf-16le").rstrip("\x00")
             resJson["riotClientBuild"] = riotClientBuild
-            save_json()
 
 def save_json():
     with open("./files/version.json", "w") as outfile:

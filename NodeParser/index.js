@@ -172,3 +172,4 @@ setInterval(() => {
 }, 300000)
 updateRiotClientManifest();
 updateManifest();
+// gitCommit();
