@@ -8,6 +8,7 @@ using System.Linq;
 using File = System.IO.File;
 using System.Text;
 using System.Text.RegularExpressions;
+using ValoParser.Parsers;
 
 namespace ValoParser
 {

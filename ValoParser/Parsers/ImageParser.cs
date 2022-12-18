@@ -4,11 +4,11 @@ using SkiaSharp;
 using System;
 using System.IO;
 
-namespace ValoParser
+namespace ValoParser.Parsers
 {
     public class ImageParser
     {
-        public void Parse(String path, String outputPath)
+        public void Parse(string path, string outputPath)
         {
             var provider = Program.provider;
             var bitmap = provider.LoadObject<UTexture2D>(path).Decode();
@@ -26,7 +26,7 @@ namespace ValoParser
             }
             using (var image = SKImage.FromBitmap(bitmap))
             using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
-            using (var stream = File.OpenWrite(String.Format(@"./assets/{0}", outputPath)))
+            using (var stream = File.OpenWrite(string.Format(@"./assets/{0}", outputPath)))
             {
                 data.SaveTo(stream);
             }

@@ -1,15 +1,14 @@
 using System;
-using System.IO;
 using Newtonsoft.Json;
 using System.Text.Json.Nodes;
-using System.Xml.Linq;
 using CUE4Parse.UE4.Versions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 using File = System.IO.File;
 using CUE4Parse.FileProvider;
+using System.Threading.Tasks;
+using ValoParser.Parsers;
 
 namespace ValoParser
 {
@@ -24,7 +23,6 @@ namespace ValoParser
             var provider = Program.provider;
             if (file.Path.StartsWith("ShooterGame/Content/Equippables/Guns/") && file.Path.EndsWith("_PrimaryAsset.uasset"))
             {
-
                 if (file.Path.Split("/")[4] != "_Core" && file.Path.Split("/")[4] != "Attachments" && file.Path.Split("/")[4] != "_Archetypes")
                 {
                     var splited = file.Path.Split("/");
@@ -241,6 +239,21 @@ namespace ValoParser
                             }
                         }
                     }
+                }
+            }
+        }
+
+        public static async Task AddVpCost()
+        {
+            Task<object> storeOffersRequest = Program.User.Store.GetStoreOffers();
+            await storeOffersRequest;
+
+            JsonObject storeOffers = JsonNode.Parse(storeOffersRequest.Result.ToString()).AsObject();
+            foreach (var offer in storeOffers["Offers"].AsArray())
+            {
+                if (jsonObject[offer["OfferID"].ToString()] != null)
+                {
+                    jsonObject[offer["OfferID"].ToString()]["vpCost"] = int.Parse(offer["Cost"]["85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"].ToString());
                 }
             }
         }
