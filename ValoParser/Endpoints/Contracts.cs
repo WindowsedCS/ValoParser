@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ValoParser.Parsers;
 
-namespace ValoParser
+namespace ValoParser.Endpoints
 {
     public static class Contracts
     {
@@ -25,8 +25,8 @@ namespace ValoParser
                 var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                 var jsonNode = JsonNode.Parse(fullJson);
                 JsonNode json = jsonNode[2]["Properties"];
-                String relationType = file.Path.Replace("ShooterGame/Content/Contracts/", "").Split("/")[0];
-                String type = null;
+                string relationType = file.Path.Replace("ShooterGame/Content/Contracts/", "").Split("/")[0];
+                string type = null;
                 switch (relationType)
                 {
                     case "Events":
@@ -50,7 +50,7 @@ namespace ValoParser
             }
         }
 
-        static JsonNode GetBattlePassSeason(String assetPathName, String relationType)
+        static JsonNode GetBattlePassSeason(string assetPathName, string relationType)
         {
             var returnJson = JsonNode.Parse("{}");
             if (assetPathName != null)
@@ -60,7 +60,7 @@ namespace ValoParser
                 var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                 var jsonNode = JsonNode.Parse(fullJson);
                 JsonNode json = jsonNode[1]["Properties"];
-                String type = null;
+                string type = null;
                 switch (relationType)
                 {
                     case "Events":
@@ -77,34 +77,34 @@ namespace ValoParser
                         break;
                 }
                 returnJson["type"] = type;
-                if (json["StartTime"] != null) returnJson["StartTime"] = new DateTime(Int64.Parse(json["StartTime"]["Ticks"].ToString())).GetDateTimeFormats('s')[0].ToString() + ".000Z";
-                if (json["EndTime"] != null) returnJson["StartTime"] = new DateTime(Int64.Parse(json["EndTime"]["Ticks"].ToString())).GetDateTimeFormats('s')[0].ToString() + ".000Z";
+                if (json["StartTime"] != null) returnJson["StartTime"] = new DateTime(long.Parse(json["StartTime"]["Ticks"].ToString())).GetDateTimeFormats('s')[0].ToString() + ".000Z";
+                if (json["EndTime"] != null) returnJson["StartTime"] = new DateTime(long.Parse(json["EndTime"]["Ticks"].ToString())).GetDateTimeFormats('s')[0].ToString() + ".000Z";
             }
             return returnJson;
         }
 
         //For future usage
-        static String GetDisplayNamePath(String assetPathName)
+        static string GetDisplayNamePath(string assetPathName)
         {
             var provider = Program.provider;
             var allExports = provider.LoadObjectExports(assetPathName.Replace("/Game", "/ShooterGame/Content").Split(".")[0]);
             var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
             var jsonNode = JsonNode.Parse(fullJson);
             JsonNode json = jsonNode[1]["Properties"];
-            String TableId = json["DisplayName"]["TableId"].ToString();
+            string TableId = json["DisplayName"]["TableId"].ToString();
 
             var stringTable = provider.LoadObjectExports(TableId.Split(".")[0]);
             var tableJson = JsonConvert.SerializeObject(stringTable, Formatting.Indented);
             var jsonNode1 = JsonNode.Parse(tableJson);
-            String namespacee = jsonNode1[0]["StringTable"]["TableNamespace"].ToString();
-            String key = json["DisplayName"]["Key"].ToString();
-            String defaultValue = jsonNode1[0]["StringTable"]["KeysToMetaData"][key].ToString();
-            String locres = key + "." + namespacee + "." + defaultValue;
+            string namespacee = jsonNode1[0]["StringTable"]["TableNamespace"].ToString();
+            string key = json["DisplayName"]["Key"].ToString();
+            string defaultValue = jsonNode1[0]["StringTable"]["KeysToMetaData"][key].ToString();
+            string locres = key + "." + namespacee + "." + defaultValue;
 
             return locres;
         }
 
-        static JsonNode getBattlePassChapters(JsonNode json, String relationType)
+        static JsonNode getBattlePassChapters(JsonNode json, string relationType)
         {
             var provider = Program.provider;
             JsonArray returnArray = new JsonArray();
@@ -123,7 +123,7 @@ namespace ValoParser
                     var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                     var jsonNode = JsonNode.Parse(fullJson);
 
-                    String uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
+                    string uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
 
                     JsonObject obj = new JsonObject();
                     obj.Add("uuid", uuid);
@@ -151,7 +151,7 @@ namespace ValoParser
                         var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                         var jsonNode = JsonNode.Parse(fullJson);
 
-                        String uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
+                        string uuid = UuidParser.Parse(jsonNode[1]["Properties"]["Uuid"].ToString());
 
                         JsonObject obj = new JsonObject();
                         obj.Add("uuid", uuid);
@@ -181,8 +181,8 @@ namespace ValoParser
                 var namespacee = all[1];
                 jsonObject.Select(p => p.Value).ToArray()[i]["displayName"] = Program.provider.GetLocalizedString(namespacee, key, all[2]).Replace(@"""", "//MARK_");
             }
-            File.WriteAllText(String.Format(@"./files/contracts/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
-            Console.WriteLine(String.Format("Successfully saved contracts in {0}!", Program.provider.GetLanguageCode(lang)));
+            File.WriteAllText(string.Format(@"./files/contracts/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
+            Console.WriteLine(string.Format("Successfully saved contracts in {0}!", Program.provider.GetLanguageCode(lang)));
             jsonObject = obj;
         }
     }

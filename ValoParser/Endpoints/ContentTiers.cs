@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ValoParser.Parsers;
 
-namespace ValoParser
+namespace ValoParser.Endpoints
 {
     public static class ContentTiers
     {
@@ -20,7 +20,7 @@ namespace ValoParser
             var provider = Program.provider;
             if (file.Path.StartsWith("ShooterGame/Content/ContentTiers/") && file.Path.EndsWith("_PrimaryAsset.uasset"))
             {
-                if (Program.logDetailed) Console.WriteLine(String.Format("Parsing battlepass season \"{0}\"...", file.Name.Replace("_DataAssetV2.uasset", "")));
+                if (Program.logDetailed) Console.WriteLine(string.Format("Parsing battlepass season \"{0}\"...", file.Name.Replace("_DataAssetV2.uasset", "")));
                 // PrimaryAsset
                 var allExports = provider.LoadObjectExports(file.Path);
                 var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
@@ -39,7 +39,8 @@ namespace ValoParser
                 {
                     var tierRank = jsonPrimary["TierRank"].ToString();
                     output.Add("tierRank", tierRank);
-                } else
+                }
+                else
                 {
                     output.Add("tierRank", "0");
                 }
@@ -47,29 +48,30 @@ namespace ValoParser
                 output.Add("juiceCost", juiceCost);
                 // DisplayName
                 // Ultra_UIData is not providing DisplayName TableID, instead, it provides Namespace, Key and Sourcestring.
-                String locres = "";
+                string locres = "";
                 if (uiData[1]["Properties"]["DisplayName"]["TableId"] != null)
                 {
-                    String TableId = uiData[1]["Properties"]["DisplayName"]["TableId"].ToString();
+                    string TableId = uiData[1]["Properties"]["DisplayName"]["TableId"].ToString();
                     var stringTable = provider.LoadObjectExports(TableId.Split(".")[0]);
                     var tableJson = JsonConvert.SerializeObject(stringTable, Formatting.Indented);
                     var jsonNode1 = JsonNode.Parse(tableJson);
-                    String namespacee = jsonNode1[0]["StringTable"]["TableNamespace"].ToString();
-                    String key = uiData[1]["Properties"]["DisplayName"]["Key"].ToString();
-                    String defaultValue = jsonNode1[0]["StringTable"]["KeysToMetaData"][key].ToString();
+                    string namespacee = jsonNode1[0]["StringTable"]["TableNamespace"].ToString();
+                    string key = uiData[1]["Properties"]["DisplayName"]["Key"].ToString();
+                    string defaultValue = jsonNode1[0]["StringTable"]["KeysToMetaData"][key].ToString();
                     locres = key + "." + namespacee + "." + defaultValue;
-                } else
+                }
+                else
                 {
-                    String namespacee = uiData[1]["Properties"]["DisplayName"]["Namespace"].ToString();
-                    String key = uiData[1]["Properties"]["DisplayName"]["Key"].ToString();
-                    String defaultValue = uiData[1]["Properties"]["DisplayName"]["SourceString"].ToString();
+                    string namespacee = uiData[1]["Properties"]["DisplayName"]["Namespace"].ToString();
+                    string key = uiData[1]["Properties"]["DisplayName"]["Key"].ToString();
+                    string defaultValue = uiData[1]["Properties"]["DisplayName"]["SourceString"].ToString();
                     locres = key + "." + namespacee + "." + defaultValue;
                 }
                 output.Add("displayName", locres);
                 // DisplayIcon
                 if (uiData[1]["Properties"]["DisplayIcon"] != null)
                 {
-                    String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
+                    string path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                     var split = path.Split(".")[0];
                     ImageParser parser = new ImageParser();
                     parser.Parse(split, "contenttiers/" + uuid + "/displayicon.png");
@@ -89,8 +91,8 @@ namespace ValoParser
                 var namespacee = all[1];
                 jsonObject.Select(p => p.Value).ToArray()[i]["displayName"] = Program.provider.GetLocalizedString(namespacee, key, all[2]).Replace(@"""", "//MARK_");
             }
-            File.WriteAllText(String.Format(@"./files/contenttiers/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
-            Console.WriteLine(String.Format("Successfully saved contenttiers in {0}!", Program.provider.GetLanguageCode(lang)));
+            File.WriteAllText(string.Format(@"./files/contenttiers/{0}.json", Program.provider.GetLanguageCode(lang)), Regex.Unescape(jsonObject.ToJsonString()).Replace(@"//MARK_", "\\\""), Encoding.UTF8);
+            Console.WriteLine(string.Format("Successfully saved contenttiers in {0}!", Program.provider.GetLanguageCode(lang)));
             jsonObject = obj;
         }
     }

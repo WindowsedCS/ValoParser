@@ -10,7 +10,7 @@ using CUE4Parse.FileProvider;
 using System.Threading.Tasks;
 using ValoParser.Parsers;
 
-namespace ValoParser
+namespace ValoParser.Endpoints
 {
     public static class Equippables
     {
@@ -28,12 +28,12 @@ namespace ValoParser
                     var splited = file.Path.Split("/");
                     if (splited[7].EndsWith("_PrimaryAsset.uasset") || splited[7] == "Chromas" || splited[7] == "Levels")
                     {
-                        if (Program.logDetailed) Console.WriteLine(String.Format("Parsing equippables \"{0}\"...", file.Name.Replace("_PrimaryAsset.uasset", "")));
+                        if (Program.logDetailed) Console.WriteLine(string.Format("Parsing equippables \"{0}\"...", file.Name.Replace("_PrimaryAsset.uasset", "")));
                         // PrimaryAsset
                         var allExports = provider.LoadObjectExports(file.Path);
                         var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                         var primaryAsset = JsonNode.Parse(fullJson);
-                        String uuid = UuidParser.Parse(primaryAsset[1]["Properties"]["Uuid"].ToString());
+                        string uuid = UuidParser.Parse(primaryAsset[1]["Properties"]["Uuid"].ToString());
                         // UIData
                         var allExports1 = provider.LoadObjectExports(primaryAsset[1]["Properties"]["UIData"]["AssetPathName"].ToString().Split(".")[0]);
                         var fullJson1 = JsonConvert.SerializeObject(allExports1, Formatting.Indented);
@@ -43,7 +43,7 @@ namespace ValoParser
                         // DisplayIcon
                         if (uiData[1]["Properties"]["DisplayIcon"] != null)
                         {
-                            String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/displayicon.png");
@@ -55,7 +55,7 @@ namespace ValoParser
                         }
                         if (uiData[1]["Properties"]["FullRender"] != null)
                         {
-                            String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/fullrender.png");
@@ -68,7 +68,7 @@ namespace ValoParser
                         // Swatch
                         if (uiData[1]["Properties"]["Swatch"] != null)
                         {
-                            String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/swatch.png");
@@ -87,7 +87,7 @@ namespace ValoParser
                             if (streamedVideo[1]["Properties"]["Uuid"] != null)
                             {
                                 var uuidVideo = streamedVideo[1]["Properties"]["Uuid"].ToString();
-                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
+                                var link = string.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
                                 dataObject.Add("streamedVideo", link);
                             }
                             else
@@ -138,12 +138,12 @@ namespace ValoParser
                 {
                     if (splited[5].EndsWith("_PrimaryAsset.uasset") || splited[5] == "Chromas" || splited[5] == "Levels")
                     {
-                        if (Program.logDetailed) Console.WriteLine(String.Format("Parsing equippables \"{0}\"...", file.Name.Replace("_PrimaryAsset.uasset", "")));
+                        if (Program.logDetailed) Console.WriteLine(string.Format("Parsing equippables \"{0}\"...", file.Name.Replace("_PrimaryAsset.uasset", "")));
                         // PrimaryAsset
                         var allExports = provider.LoadObjectExports(file.Path);
                         var fullJson = JsonConvert.SerializeObject(allExports, Formatting.Indented);
                         var primaryAsset = JsonNode.Parse(fullJson);
-                        String uuid = UuidParser.Parse(primaryAsset[1]["Properties"]["Uuid"].ToString());
+                        string uuid = UuidParser.Parse(primaryAsset[1]["Properties"]["Uuid"].ToString());
                         // UIData
                         var allExports1 = provider.LoadObjectExports(primaryAsset[1]["Properties"]["UIData"]["AssetPathName"].ToString().Split(".")[0]);
                         var fullJson1 = JsonConvert.SerializeObject(allExports1, Formatting.Indented);
@@ -153,7 +153,7 @@ namespace ValoParser
                         // DisplayIcon
                         if (uiData[1]["Properties"]["DisplayIcon"] != null)
                         {
-                            String path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["DisplayIcon"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/displayicon.png");
@@ -165,7 +165,7 @@ namespace ValoParser
                         }
                         if (uiData[1]["Properties"]["FullRender"] != null)
                         {
-                            String path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["FullRender"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/fullrender.png");
@@ -178,7 +178,7 @@ namespace ValoParser
                         // Swatch
                         if (uiData[1]["Properties"]["Swatch"] != null)
                         {
-                            String path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
+                            string path = uiData[1]["Properties"]["Swatch"]["ObjectPath"].ToString();
                             var split = path.Split(".")[0];
                             ImageParser parser = new ImageParser();
                             parser.Parse(split, "weapons/" + uuid + "/swatch.png");
@@ -197,7 +197,7 @@ namespace ValoParser
                             if (streamedVideo[1]["Properties"]["Uuid"] != null)
                             {
                                 var uuidVideo = streamedVideo[1]["Properties"]["Uuid"].ToString();
-                                var link = String.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
+                                var link = string.Format("https://valorant.dyn.riotcdn.net/x/videos/{0}/{1}_default_universal.mp4", Program.version["branch"].ToString(), UuidParser.Parse(uuidVideo));
                                 dataObject.Add("streamedVideo", link);
                             }
                             else
@@ -261,8 +261,8 @@ namespace ValoParser
         public static void Localization(ELanguage lang)
         {
             var output = Regex.Replace(Regex.Unescape(GetLanguageStrings(jsonArray, jsonObject).ToJsonString()), @"\r\n?|\n", "\\n").Replace(@"//MARK_", "\\\"");
-            File.WriteAllText(String.Format(@"./files/weapons/{0}.json", Program.provider.GetLanguageCode(lang)), output, Encoding.UTF8);
-            Console.WriteLine(String.Format("Successfully saved weapons in {0}!", Program.provider.GetLanguageCode(lang)));
+            File.WriteAllText(string.Format(@"./files/weapons/{0}.json", Program.provider.GetLanguageCode(lang)), output, Encoding.UTF8);
+            Console.WriteLine(string.Format("Successfully saved weapons in {0}!", Program.provider.GetLanguageCode(lang)));
         }
 
         private static JsonObject GetLanguageStrings(JsonArray jsonArray, JsonObject jsonObject)
