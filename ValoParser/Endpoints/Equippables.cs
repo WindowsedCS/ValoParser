@@ -18,7 +18,7 @@ namespace ValoParser.Endpoints
         private static JsonArray jsonArray = new JsonArray();
         private static JsonObject jsonObject = new JsonObject();
 
-        public static void weapons(GameFile file)
+        public static void Weapons(GameFile file)
         {
             var provider = Program.provider;
             if (file.Path.StartsWith("ShooterGame/Content/Equippables/Guns/") && file.Path.EndsWith("_PrimaryAsset.uasset"))

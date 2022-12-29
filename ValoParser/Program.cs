@@ -11,6 +11,7 @@ using ValNet.Objects.Authentication;
 using ValNet;
 using ValNet.Enums;
 using ValNet.Objects;
+using ValoParser.Endpoints;
 
 namespace ValoParser
 {
@@ -76,12 +77,17 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./files/contenttiers");
                 }
+                if (!Directory.Exists(@"./assets/audios"))
+                {
+                    Directory.CreateDirectory("./assets/audios");
+                }
                 //Parse game assets
                 foreach (var file in provider.Files.Values)
                 {
-                    Equippables.weapons(file);
+                    Equippables.Weapons(file);
                     Contracts.Parse(file);
                     ContentTiers.Parse(file);
+                    WwiseAudio.Parse(file);
                 }
                 Console.WriteLine("Game Assets have been successfully parsed!");
                 Console.WriteLine("Adding VP Cost to weapons...");
