@@ -1,6 +1,5 @@
 using CUE4Parse.Utils;
 using CUE4Parse_Conversion.Sounds;
-using System;
 using System.Diagnostics;
 using System.IO;
 namespace ValoParser.Parsers
@@ -30,10 +29,9 @@ namespace ValoParser.Parsers
 
         static void WemToWav(string outputPath)
         {
-            string wavFilePath = string.Empty;
             var vgmFilePath = Path.Combine(@"./tools", "vgmstream", "test.exe");
             if (!File.Exists(vgmFilePath)) return;
-            wavFilePath = Path.ChangeExtension(outputPath, ".wav");
+            string wavFilePath = Path.ChangeExtension(outputPath, ".wav");
             var vgmProcess = Process.Start(new ProcessStartInfo
             {
                 FileName = vgmFilePath,
