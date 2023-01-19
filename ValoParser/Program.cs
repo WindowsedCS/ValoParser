@@ -87,7 +87,19 @@ namespace ValoParser
                     Equippables.Weapons(file);
                     Contracts.Parse(file);
                     ContentTiers.Parse(file);
-                    WwiseAudio.Parse(file);
+                    if (args.Length > 1)
+                    {
+                        if (args[1] == "true")
+                        {
+                            if (args.Length > 2)
+                            {
+                                WwiseAudio.Parse(file, args[2]);
+                            } else
+                            {
+                                WwiseAudio.Parse(file);
+                            }
+                        }
+                    }
                 }
                 Console.WriteLine("Game Assets have been successfully parsed!");
                 Console.WriteLine("Adding VP Cost to weapons...");

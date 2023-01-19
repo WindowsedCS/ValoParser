@@ -26,18 +26,20 @@ def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-S
         resJson["manifestId"] = manifest["Manifest ID"]
         # Parse EXE file
         data = exe_file.read()
-        # VALORANT Branch
         pattern = "++Ares-Core+release-".encode("utf-16le")
+        patternBuild = "ProductVersion".encode("utf-16le")
+        # VALORANT Branch
         pos = data.find(pattern) + len(pattern)
         branch = "release-{0}".format(data[pos:pos+16].decode("utf-16le").rstrip("\x00"))
         resJson["branch"] = branch
         # VALORANT Version
-        pos = data.find(pattern) + len(pattern) + 48
+        pos = data.find(pattern) + len(pattern) + 40
         version = data[pos:pos+32].decode("utf-16le").rstrip("\x00")
         resJson["version"] = version
         # Build Version
-        pos = data.find(pattern) + len(pattern) + 40
-        buildVersion = data[pos:pos+6].decode("utf-16le").rstrip("\x00")
+        pos = data.find(patternBuild) + len(patternBuild) + 2
+        buildVersion = data[pos:pos+4].decode("utf-16le").rstrip("\x00")
+        # data[pos:pos+100].decode("utf-16le").rstrip("\x00")
         resJson["buildVersion"] = buildVersion
         # Riot Client Version
         riotClientVersion = "{0}-shipping-{1}-{2}".format(branch, buildVersion, version.split(".").pop())

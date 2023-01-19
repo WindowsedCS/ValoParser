@@ -38,14 +38,14 @@ namespace ValoParser.Endpoints
                 if (jsonPrimary["TierRank"] != null)
                 {
                     var tierRank = jsonPrimary["TierRank"].ToString();
-                    output.Add("tierRank", tierRank);
+                    output.Add("tierRank", int.Parse(tierRank));
                 }
                 else
                 {
-                    output.Add("tierRank", "0");
+                    output.Add("tierRank", 0);
                 }
-                output.Add("juiceValue", juiceValue);
-                output.Add("juiceCost", juiceCost);
+                output.Add("juiceValue", int.Parse(juiceValue));
+                output.Add("juiceCost", int.Parse(juiceCost));
                 // DisplayName
                 // Ultra_UIData is not providing DisplayName TableID, instead, it provides Namespace, Key and Sourcestring.
                 string locres = "";
