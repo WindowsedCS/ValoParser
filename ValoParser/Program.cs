@@ -55,7 +55,7 @@ namespace ValoParser
             provider.Initialize();
             provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
 
-            await loginRiotAPI();
+            // await loginRiotAPI();
 
             Console.WriteLine("Parsing Game Assets...");
             if (Directory.Exists(gameDirectory))
@@ -82,7 +82,7 @@ namespace ValoParser
                     Directory.CreateDirectory("./assets/audios");
                 }
                 //Parse game assets
-                foreach (var file in provider.Files.Values)
+                Parallel.ForEach(provider.Files.Values, file =>
                 {
                     Equippables.Weapons(file);
                     Contracts.Parse(file);
@@ -94,17 +94,18 @@ namespace ValoParser
                             if (args.Length > 2)
                             {
                                 WwiseAudio.Parse(file, args[2]);
-                            } else
+                            }
+                            else
                             {
                                 WwiseAudio.Parse(file);
                             }
                         }
                     }
-                }
+                });
                 Console.WriteLine("Game Assets have been successfully parsed!");
-                Console.WriteLine("Adding VP Cost to weapons...");
+                /* Console.WriteLine("Adding VP Cost to weapons...");
                 await Equippables.AddVpCost();
-                Console.WriteLine("VP Cost has been successfully added to weapons!");
+                Console.WriteLine("VP Cost has been successfully added to weapons!"); */
                 //Parse localizations
                 Console.WriteLine("Localizing all endpoint files...");
                 foreach (var lang in languageCodes)

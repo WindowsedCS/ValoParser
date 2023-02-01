@@ -402,5 +402,6 @@ NodeParser/*.manifest
 NodeParser/assets/
 NodeParser/files/
 NodeParser/Game/
+NodeParser/config.json
 NodeParser/bak/
 NodeParser/tools/
