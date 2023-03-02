@@ -29,7 +29,7 @@ namespace ValoParser.Endpoints
                 itemObject.Add("startingLevel", int.Parse(primaryAsset[1]["Properties"]["StartingLevel"].ToString()));
 
                 // UIData
-                var uidataExports = provider.LoadObjectExports(primaryAsset[1]["Properties"]["UIData"]["AssetPathName"].ToString());
+                var uidataExports = provider.LoadObjectExports(primaryAsset[1]["Properties"]["UIData"]["AssetPathName"].ToString().Split(".")[0]);
                 var uidataJson = JsonConvert.SerializeObject(uidataExports, Formatting.Indented);
                 var UIData = JsonNode.Parse(uidataJson);
                 ImageParser parser = new ImageParser();

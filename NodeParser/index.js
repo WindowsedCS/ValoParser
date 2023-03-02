@@ -138,8 +138,12 @@ async function updateManifest() {
 //Overall
 async function parseVersion() {
     if (!fs.existsSync("./files/manifest")) fs.mkdirSync("./files/manifest");
-    fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
-    fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
+    try {
+        fs.renameSync(`./RiotClient.json`, './files/manifest/RiotClient.json');
+        fs.renameSync(`./VALORANT.json`, './files/manifest/VALORANT.json');
+    } catch (e) {
+        console.log(e)
+    }
     const downloader = spawn("python", ["./tools/VersionParser.py", `${dataConfig.path.VALORANT}`, `${dataConfig.path.RiotClient}`]);
     downloader.stdout.on('data', async (data) => {
         console.log(`${data.toString("utf8").replace("\n", "")}`);
