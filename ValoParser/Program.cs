@@ -81,12 +81,17 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./assets/audios");
                 }
+                if (!Directory.Exists(@"./assets/levelborders"))
+                {
+                    Directory.CreateDirectory("./assets/levelborders");
+                }
                 //Parse game assets
                 Parallel.ForEach(provider.Files.Values, file =>
                 {
                     Equippables.Weapons(file);
                     Contracts.Parse(file);
                     ContentTiers.Parse(file);
+                    LevelBorders.Parse(file);
                     if (args.Length > 1)
                     {
                         if (args[1] == "true")
@@ -114,6 +119,7 @@ namespace ValoParser
                     Equippables.Localization(lang);
                     Contracts.Localization(lang);
                     ContentTiers.Localization(lang);
+                    LevelBorders.Localization(lang);
                 }
                 Console.WriteLine("VALORANT bas been successfully parsed!");
             } else
