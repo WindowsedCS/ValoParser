@@ -69,7 +69,7 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./files/weapons");
                 }
-                if (!Directory.Exists(@"./files/contracts"))
+                /* if (!Directory.Exists(@"./files/contracts"))
                 {
                     Directory.CreateDirectory("./files/contracts");
                 }
@@ -84,14 +84,14 @@ namespace ValoParser
                 if (!Directory.Exists(@"./assets/levelborders"))
                 {
                     Directory.CreateDirectory("./assets/levelborders");
-                }
+                } */
                 //Parse game assets
                 Parallel.ForEach(provider.Files.Values, file =>
                 {
                     Equippables.Weapons(file);
-                    Contracts.Parse(file);
-                    ContentTiers.Parse(file);
-                    LevelBorders.Parse(file);
+                    // Contracts.Parse(file);
+                    // ContentTiers.Parse(file);
+                    // LevelBorders.Parse(file);
                     if (args.Length > 1)
                     {
                         if (args[1] == "true")
@@ -117,9 +117,9 @@ namespace ValoParser
                 {
                     provider.LoadLocalization(lang);
                     Equippables.Localization(lang);
-                    Contracts.Localization(lang);
-                    ContentTiers.Localization(lang);
-                    LevelBorders.Localization(lang);
+                    // Contracts.Localization(lang);
+                    // ContentTiers.Localization(lang);
+                    // LevelBorders.Localization(lang);
                 }
                 Console.WriteLine("VALORANT bas been successfully parsed!");
             } else
