@@ -55,7 +55,7 @@ namespace ValoParser
             provider.Initialize();
             provider.SubmitKey(new FGuid(), new FAesKey(_aesKey));
 
-            // await loginRiotAPI();
+            await loginRiotAPI();
 
             Console.WriteLine("Parsing Game Assets...");
             if (Directory.Exists(gameDirectory))
@@ -69,7 +69,7 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./files/weapons");
                 }
-                /* if (!Directory.Exists(@"./files/contracts"))
+                if (!Directory.Exists(@"./files/contracts"))
                 {
                     Directory.CreateDirectory("./files/contracts");
                 }
@@ -81,17 +81,17 @@ namespace ValoParser
                 {
                     Directory.CreateDirectory("./assets/audios");
                 }
-                if (!Directory.Exists(@"./assets/levelborders"))
+                if (!Directory.Exists(@"./files/levelborders"))
                 {
-                    Directory.CreateDirectory("./assets/levelborders");
-                } */
+                    Directory.CreateDirectory("./files/levelborders");
+                }
                 //Parse game assets
                 Parallel.ForEach(provider.Files.Values, file =>
                 {
                     Equippables.Weapons(file);
-                    // Contracts.Parse(file);
-                    // ContentTiers.Parse(file);
-                    // LevelBorders.Parse(file);
+                    Contracts.Parse(file);
+                    ContentTiers.Parse(file);
+                    LevelBorders.Parse(file);
                     if (args.Length > 1)
                     {
                         if (args[1] == "true")
@@ -108,18 +108,18 @@ namespace ValoParser
                     }
                 });
                 Console.WriteLine("Game Assets have been successfully parsed!");
-                /* Console.WriteLine("Adding VP Cost to weapons...");
+                Console.WriteLine("Adding VP Cost to weapons...");
                 await Equippables.AddVpCost();
-                Console.WriteLine("VP Cost has been successfully added to weapons!"); */
+                Console.WriteLine("VP Cost has been successfully added to weapons!");
                 //Parse localizations
                 Console.WriteLine("Localizing all endpoint files...");
                 foreach (var lang in languageCodes)
                 {
                     provider.LoadLocalization(lang);
                     Equippables.Localization(lang);
-                    // Contracts.Localization(lang);
-                    // ContentTiers.Localization(lang);
-                    // LevelBorders.Localization(lang);
+                    Contracts.Localization(lang);
+                    ContentTiers.Localization(lang);
+                    LevelBorders.Localization(lang);
                 }
                 Console.WriteLine("VALORANT bas been successfully parsed!");
             } else

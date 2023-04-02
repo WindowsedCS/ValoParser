@@ -128,13 +128,9 @@ namespace ValoParser.Endpoints
             for (var i = 0; i < jsonArray.Count; i++)
             {
                 var uuid = jsonArray[i]["uuid"].ToString();
-                Console.WriteLine(1);
                 string localized = Program.provider.GetLocalizedString(jsonArray[i]["namespacee"].ToString(), jsonArray[i]["key"].ToString(), jsonArray[i]["defaultValue"].ToString());
-                Console.WriteLine(2);
                 jsonObject[uuid]["displayName"] = localized.Replace(@"""", "//MARK_");
-                Console.WriteLine(3);
                 languageStrings.Add(uuid, jsonObject[uuid].Deserialize<JsonNode>());
-                Console.WriteLine(4);
             }
             return languageStrings;
         }
