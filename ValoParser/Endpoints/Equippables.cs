@@ -40,6 +40,7 @@ namespace ValoParser.Endpoints
                             var fullJson1 = JsonConvert.SerializeObject(allExports1, Formatting.Indented);
                             var themeAsset = JsonNode.Parse(fullJson1);
                             var uuid = UuidParser.Parse(themeAsset[1]["Properties"]["Uuid"].ToString());
+                            
                             // Parse Each
                             var levelsJson = JsonNode.Parse(primaryAsset[1]["Properties"]["Levels"].ToString()).AsArray();
                             var chromasJson = JsonNode.Parse(primaryAsset[1]["Properties"]["Chromas"].ToString()).AsArray();
@@ -77,6 +78,7 @@ namespace ValoParser.Endpoints
                             var allExports1 = provider.LoadObjectExports(primaryAsset[1]["Properties"]["Theme"]["AssetPathName"].ToString().Split(".")[0]);
                             var fullJson1 = JsonConvert.SerializeObject(allExports1, Formatting.Indented);
                             var themeAsset = JsonNode.Parse(fullJson1);
+
                             var uuid = UuidParser.Parse(themeAsset[1]["Properties"]["Uuid"].ToString());
                             // Parse Each
                             var levelsJson = JsonNode.Parse(primaryAsset[1]["Properties"]["Levels"].ToString()).AsArray();

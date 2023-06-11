@@ -1,6 +1,6 @@
 {
     "path": {
-        "VALORANT": "./Game/VALORANT",
-        "RiotClient": "./Game/Riot Client"
+        "VALORANT": "C:/Riot Games/VALORANT/live",
+        "RiotClient": "C:/Riot Games/Riot Client"
     }
 }

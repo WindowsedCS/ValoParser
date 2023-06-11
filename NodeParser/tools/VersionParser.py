@@ -32,7 +32,7 @@ def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-S
 
         # Formatting Data
         pos = data.find(pattern) + len(pattern)
-        fullData = data[pos:pos+100].decode("utf-16le").split("\u0000")
+        fullData = data[pos:pos+100].decode("utf-16le").rstrip("\x00").split("\u0000")
         parsedData = []
         for i in range(0, len(fullData)):
             if fullData[i] != "":
@@ -44,10 +44,14 @@ def get_valorant_version(path = "{0}/ShooterGame/Binaries/Win64/VALORANT-Win64-S
 
         # Build Date
         date = parsedData[1].rstrip("\x00").split(" ")
-        month =  date[0]
-        day =  date[1]
-        year =  date[2]
-        buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(year, json1[month], day)
+        parsedDate = []
+        for i in range(0, len(date)):
+            if date[i] != "":
+                parsedDate.append(date[i])
+        month =  parsedDate[0]
+        day =  parsedDate[1]
+        year =  parsedDate[2]
+        buildDate = "{0}-{1}-{2}T00:00:00.000Z".format(add_zero(year), add_zero(json1[month]), add_zero(day))
 
         # VALORANT Version
         if "." in parsedData[2].rstrip("\x00"):
@@ -75,19 +79,41 @@ def get_riot_client_version(path = "{0}/RiotClientServices.exe".format(sys.argv[
         # Riot Client Build
         data = exe_file.read()
         pattern = "FileVersion".encode("utf-16le")
-        pos = data.find(pattern) + len(pattern) + 4
-        riotClientVersion = data[pos:pos+30].decode("utf-16le").rstrip("\x00")
+
+        pos = data.find(pattern) + len(pattern)
+        fullData = data[pos:pos+100].decode("utf-16le").rstrip("\x00").split("\u0000")
+        parsedData = []
+        for i in range(0, len(fullData)):
+            if fullData[i] != "":
+                parsedData.append(fullData[i])
+
+        riotClientVersion = parsedData[0]
         
         # Riot Api Version
         with open(path1, "rb") as exe_file:
             data = exe_file.read()
             pattern = "FileVersion".encode("utf-16le")
-            pos = data.find(pattern) + len(pattern) + 20
-            riotClientBuild = riotClientVersion + "." + data[pos:pos+14].decode("utf-16le").rstrip("\x00")
+
+            pos = data.find(pattern) + len(pattern)
+            fullData = data[pos:pos+100].decode("utf-16le").rstrip("\x00").split("\u0000")
+            parsedData = []
+            for i in range(0, len(fullData)):
+                if fullData[i] != "":
+                    parsedData.append(fullData[i])
+            apiVersion = parsedData[0]
+            apiVersion = apiVersion.split(".")[3]
+
+            riotClientBuild = riotClientVersion + "." + apiVersion
             resJson["riotClientBuild"] = riotClientBuild
 
 def save_json():
     with open("./files/version.json", "w") as outfile:
         json.dump(resJson, outfile)
+
+def add_zero(number):
+    if len(str(number)) == 1:
+        return "0" + str(number)
+    else:
+        return str(number)
 
 get_valorant_version()
