@@ -66,10 +66,20 @@ namespace CUE4Parse.UE4.Assets
             {
                 obj.Deserialize(Ar, validPos);
 #if DEBUG
-                if (validPos != Ar.Position)
-                    Log.Warning("Did not read {0} correctly, {1} bytes remaining", obj.ExportType, validPos - Ar.Position);
-                else
-                    Log.Debug("Successfully read {0} at {1} with size {2}", obj.ExportType, serialOffset, serialSize);
+                var remaining = validPos - Ar.Position;
+                switch (remaining)
+                {
+                    case > 0:
+                        Log.Warning("Did not read {0} correctly, {1} bytes remaining ({2}%)", obj.ExportType, remaining,
+                            Math.Round((decimal)remaining / validPos * 100, 2));
+                        break;
+                    case < 0:
+                        Log.Warning("Did not read {0} correctly, {1} bytes exceeded", obj.ExportType, Math.Abs(remaining));
+                        break;
+                    default:
+                        Log.Debug("Successfully read {0} at {1} with size {2}", obj.ExportType, serialOffset, serialSize);
+                        break;
+                }
 #endif
             }
             catch (Exception e)
@@ -171,8 +181,9 @@ namespace CUE4Parse.UE4.Assets
         public void GetFullName(bool includeOuterMostName, StringBuilder resultString, bool includeClassPackage = false)
         {
             resultString.Append(includeClassPackage ? Class?.GetPathName() : Class?.Name);
-            resultString.Append(' ');
+            resultString.Append('\'');
             GetPathName(includeOuterMostName, resultString);
+            resultString.Append('\'');
         }
 
         public string GetPathName(bool includeOuterMostName = true)
@@ -235,44 +246,20 @@ namespace CUE4Parse.UE4.Assets
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(ResolvedObject? other)
+            => other != null && ExportIndex == other.ExportIndex && Name == other.Name && Package == other.Package;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override bool Equals(object? obj) => obj is ResolvedObject other && Equals(other);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ExportIndex, Name.GetHashCode(), Package.GetHashCode());
+        }
+
         public override string ToString() => GetFullName();
-    }
-
-    public class ResolvedObjectConverter : JsonConverter<ResolvedObject>
-    {
-        public override void WriteJson(JsonWriter writer, ResolvedObject value, JsonSerializer serializer)
-        {
-            var top = value;
-            ResolvedObject outerMost;
-            while (true)
-            {
-                var outer = top.Outer;
-                if (outer == null)
-                {
-                    outerMost = top;
-                    break;
-                }
-
-                top = outer;
-            }
-
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("ObjectName"); // 1:2:3 if we are talking about an export in the current asset
-            writer.WriteValue(value.GetFullName(false));
-
-            writer.WritePropertyName("ObjectPath"); // package path . export index
-            var outerMostName = outerMost.Name.Text;
-            writer.WriteValue(value.ExportIndex != -1 ? $"{outerMostName}.{value.ExportIndex}" : outerMostName);
-
-            writer.WriteEndObject();
-        }
-
-        public override ResolvedObject ReadJson(JsonReader reader, Type objectType, ResolvedObject existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
-        }
     }
 
     public class ResolvedLoadedObject : ResolvedObject

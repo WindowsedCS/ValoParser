@@ -43,6 +43,13 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             Z = z;
         }
 
+        public FVector(double x, double y, double z)
+        {
+            X = (float) x;
+            Y = (float) y;
+            Z = (float) z;
+        }
+
         public FVector(FArchive Ar)
         {
             if (Ar.Ver >= EUnrealEngineObjectUE5Version.LARGE_WORLD_COORDINATES)
@@ -121,6 +128,13 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             X = X >= 0 ? 1 : -1, Y = Y >= 0 ? 1 : -1, Z = Z >= 0 ? 1 : -1
         };
 
+        public void Scale(float scale)
+        {
+            X *= scale;
+            Y *= scale;
+            Z *= scale;
+        }
+
         public void Scale(FVector scale)
         {
             X *= scale.X;
@@ -173,6 +187,16 @@ namespace CUE4Parse.UE4.Objects.Core.Math
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FVector operator *(FVector a, float scale) => new(a.X * scale, a.Y * scale, a.Z * scale);
+
+        public static FVector operator *(FVector v, FQuat q)
+        {
+            var u = new FVector(q.X, q.Y, q.Z);
+            float s = q.W;
+
+            return 2.0f * DotProduct(u, v) * u
+                     + (s*s - DotProduct(u, u)) * v
+                     + 2.0f * s * CrossProduct(u, v);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static FVector operator *(float scale, FVector a) => a * scale;
@@ -545,6 +569,6 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             Ar.Write(Z);
         }
 
-        public static implicit operator Vector3(FVector v) => new(v.X, v.Z, v.Y);
+        public static implicit operator Vector3(FVector v) => new(v.X, v.Y, v.Z);
     }
 }

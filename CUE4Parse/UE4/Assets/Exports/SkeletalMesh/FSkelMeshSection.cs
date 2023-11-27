@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CUE4Parse.UE4.Assets.Readers;
@@ -29,9 +29,7 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
         public ESkinVertexColorChannel RecomputeTangentsVertexMaskChannel;
         public bool bCastShadow;
         public bool bVisibleInRayTracing;
-        [Obsolete]
         public bool bLegacyClothingSection;
-        [Obsolete]
         public short CorrespondClothSectionIndex;
         public uint BaseVertexIndex;
         public FSoftVertex[] SoftVertices;
@@ -57,7 +55,10 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
             bVisibleInRayTracing = true;
             CorrespondClothSectionIndex = -1;
             SoftVertices = Array.Empty<FSoftVertex>();
+            ClothMappingDataLODs = Array.Empty<FMeshToMeshVertData[]>();
+            BoneMap = Array.Empty<ushort>();
             MaxBoneInfluences = 4;
+            OverlappingVertices = new Dictionary<int, int[]>();
             GenerateUpToLodIndex = -1;
             OriginalDataSectionIndex = -1;
             ChunkedParentSectionIndex = -1;
@@ -112,6 +113,8 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
             RecomputeTangentsVertexMaskChannel = FRecomputeTangentCustomVersion.Get(Ar) >= FRecomputeTangentCustomVersion.Type.RecomputeTangentVertexColorMask ? Ar.Read<ESkinVertexColorChannel>() : ESkinVertexColorChannel.None;
             bCastShadow = FEditorObjectVersion.Get(Ar) < FEditorObjectVersion.Type.RefactorMeshEditorMaterials || Ar.ReadBoolean();
             bVisibleInRayTracing = FUE5MainStreamObjectVersion.Get(Ar) < FUE5MainStreamObjectVersion.Type.SkelMeshSectionVisibleInRayTracingFlagAdded || Ar.ReadBoolean();
+
+            if (Ar.Game == EGame.GAME_TrainSimWorld2020) Ar.Position += 8;
 
             if (skelMeshVer >= FSkeletalMeshCustomVersion.Type.CombineSectionWithChunk)
             {
@@ -174,6 +177,16 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
                     ClothingData = Ar.Read<FClothingSectionData>();
                 }
 
+                if (Ar.Game is EGame.GAME_KingdomHearts3 or EGame.GAME_FinalFantasy7Remake)
+                {
+                    var shouldReadArray = Ar.Read<int>();
+                    var arrayLength = Ar.Read<int>();
+                    if (shouldReadArray == 1)
+                    {
+                        Ar.Position += Ar.Game == EGame.GAME_KingdomHearts3 ? arrayLength * 24 : arrayLength * 16;
+                    }
+                }
+
                 if (FOverlappingVerticesCustomVersion.Get(Ar) >= FOverlappingVerticesCustomVersion.Type.DetectOVerlappingVertices)
                 {
                     var size = Ar.Read<int>();
@@ -219,6 +232,7 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
             MaterialIndex = Ar.Read<short>();
             BaseIndex = Ar.Read<int>();
             NumTriangles = Ar.Read<int>();
+            if (Ar.Game == EGame.GAME_Paragon) Ar.Position += 1; // bool
             bRecomputeTangent = Ar.ReadBoolean();
             RecomputeTangentsVertexMaskChannel = FRecomputeTangentCustomVersion.Get(Ar) >= FRecomputeTangentCustomVersion.Type.RecomputeTangentVertexColorMask ? Ar.Read<ESkinVertexColorChannel>() : ESkinVertexColorChannel.None;
             bCastShadow = FEditorObjectVersion.Get(Ar) < FEditorObjectVersion.Type.RefactorMeshEditorMaterials || Ar.ReadBoolean();
@@ -231,6 +245,8 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
             CorrespondClothAssetIndex = Ar.Read<short>();
             ClothingData = Ar.Read<FClothingSectionData>();
 
+            if (Ar.Game == EGame.GAME_Paragon) return;
+
             if (Ar.Game < EGame.GAME_UE4_23 || !stripDataFlags.IsClassDataStripped(1)) // DuplicatedVertices, introduced in UE4.23
             {
                 Ar.SkipFixedArray(4); // DupVertData
@@ -242,95 +258,18 @@ namespace CUE4Parse.UE4.Assets.Exports.SkeletalMesh
                 bDisabled = Ar.ReadBoolean();
             }
 
-            if (Ar.Game == EGame.GAME_RogueCompany)
+            switch (Ar.Game)
             {
-                Ar.Position += 4;
+                case EGame.GAME_OutlastTrials:
+                    Ar.Position += 1;
+                    break;
+                case EGame.GAME_RogueCompany or EGame.GAME_BladeAndSoul or EGame.GAME_SYNCED:
+                    Ar.Position += 4;
+                    break;
+                case EGame.GAME_CalabiYau:
+                    Ar.Position += 8;
+                    break;
             }
-        }
-    }
-
-    public class FSkelMeshSectionConverter : JsonConverter<FSkelMeshSection>
-    {
-        public override void WriteJson(JsonWriter writer, FSkelMeshSection value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("MaterialIndex");
-            writer.WriteValue(value.MaterialIndex);
-
-            writer.WritePropertyName("BaseIndex");
-            writer.WriteValue(value.BaseIndex);
-
-            writer.WritePropertyName("NumTriangles");
-            writer.WriteValue(value.NumTriangles);
-
-            writer.WritePropertyName("bRecomputeTangent");
-            writer.WriteValue(value.bRecomputeTangent);
-
-            writer.WritePropertyName("RecomputeTangentsVertexMaskChannel");
-            writer.WriteValue(value.RecomputeTangentsVertexMaskChannel.ToString());
-
-            writer.WritePropertyName("bCastShadow");
-            writer.WriteValue(value.bCastShadow);
-
-            writer.WritePropertyName("bVisibleInRayTracing");
-            writer.WriteValue(value.bVisibleInRayTracing);
-
-            writer.WritePropertyName("bLegacyClothingSection");
-            writer.WriteValue(value.bLegacyClothingSection);
-
-            writer.WritePropertyName("CorrespondClothSectionIndex");
-            writer.WriteValue(value.CorrespondClothSectionIndex);
-
-            writer.WritePropertyName("BaseVertexIndex");
-            writer.WriteValue(value.BaseVertexIndex);
-
-            //writer.WritePropertyName("SoftVertices");
-            //serializer.Serialize(writer, value.SoftVertices);
-
-            //writer.WritePropertyName("ClothMappingDataLODs");
-            //serializer.Serialize(writer, value.ClothMappingDataLODs);
-
-            //writer.WritePropertyName("BoneMap");
-            //serializer.Serialize(writer, value.BoneMap);
-
-            writer.WritePropertyName("NumVertices");
-            writer.WriteValue(value.NumVertices);
-
-            writer.WritePropertyName("MaxBoneInfluences");
-            writer.WriteValue(value.MaxBoneInfluences);
-
-            writer.WritePropertyName("bUse16BitBoneIndex");
-            writer.WriteValue(value.bUse16BitBoneIndex);
-
-            writer.WritePropertyName("CorrespondClothAssetIndex");
-            writer.WriteValue(value.CorrespondClothAssetIndex);
-
-            //writer.WritePropertyName("ClothingData");
-            //serializer.Serialize(writer, value.ClothingData);
-
-            //writer.WritePropertyName("OverlappingVertices");
-            //serializer.Serialize(writer, value.OverlappingVertices);
-
-            writer.WritePropertyName("bDisabled");
-            writer.WriteValue(value.bDisabled);
-
-            writer.WritePropertyName("GenerateUpToLodIndex");
-            writer.WriteValue(value.GenerateUpToLodIndex);
-
-            writer.WritePropertyName("OriginalDataSectionIndex");
-            writer.WriteValue(value.OriginalDataSectionIndex);
-
-            writer.WritePropertyName("ChunkedParentSectionIndex");
-            writer.WriteValue(value.ChunkedParentSectionIndex);
-
-            writer.WriteEndObject();
-        }
-
-        public override FSkelMeshSection ReadJson(JsonReader reader, Type objectType, FSkelMeshSection existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

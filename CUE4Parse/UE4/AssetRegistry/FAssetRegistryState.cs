@@ -14,14 +14,21 @@ namespace CUE4Parse.UE4.AssetRegistry
         public FDependsNode[] PreallocatedDependsNodeDataBuffers;
         public FAssetPackageData[] PreallocatedPackageDataBuffers;
 
-        public FAssetRegistryState(FArchive Ar)
+        public FAssetRegistryState()
+        {
+            PreallocatedAssetDataBuffers = Array.Empty<FAssetData>();
+            PreallocatedDependsNodeDataBuffers = Array.Empty<FDependsNode>();
+            PreallocatedPackageDataBuffers = Array.Empty<FAssetPackageData>();
+        }
+
+        public FAssetRegistryState(FArchive Ar) : this()
         {
             var header = new FAssetRegistryHeader(Ar);
             var version = header.Version;
             switch (version)
             {
-                case < FAssetRegistryVersionType.RemovedMD5Hash:
-                    Log.Warning($"Cannot read registry state before '{version}'");
+                case < FAssetRegistryVersionType.AddAssetRegistryState:
+                    Log.Warning("Cannot read registry state before {Version}", version);
                     break;
                 case < FAssetRegistryVersionType.FixedTags:
                 {
@@ -41,6 +48,9 @@ namespace CUE4Parse.UE4.AssetRegistry
         private void Load(FAssetRegistryArchive Ar)
         {
             PreallocatedAssetDataBuffers = Ar.ReadArray(() => new FAssetData(Ar));
+
+            if (Ar.Header.Version < FAssetRegistryVersionType.RemovedMD5Hash)
+                return; // Just ignore the rest of this for now.
 
             if (Ar.Header.Version < FAssetRegistryVersionType.AddedDependencyFlags)
             {
@@ -89,31 +99,6 @@ namespace CUE4Parse.UE4.AssetRegistry
             {
                 dependsNode.SerializeLoad(Ar, PreallocatedDependsNodeDataBuffers);
             }
-        }
-    }
-
-    public class FAssetRegistryStateConverter : JsonConverter<FAssetRegistryState>
-    {
-        public override void WriteJson(JsonWriter writer, FAssetRegistryState value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("PreallocatedAssetDataBuffers");
-            serializer.Serialize(writer, value.PreallocatedAssetDataBuffers);
-
-            writer.WritePropertyName("PreallocatedDependsNodeDataBuffers");
-            serializer.Serialize(writer, value.PreallocatedDependsNodeDataBuffers);
-
-            writer.WritePropertyName("PreallocatedPackageDataBuffers");
-            serializer.Serialize(writer, value.PreallocatedPackageDataBuffers);
-
-            writer.WriteEndObject();
-        }
-
-        public override FAssetRegistryState ReadJson(JsonReader reader, Type objectType, FAssetRegistryState existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

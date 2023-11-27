@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace CUE4Parse.UE4.AssetRegistry.Objects
+﻿namespace CUE4Parse.UE4.AssetRegistry.Objects
 {
     public static class FValueHandle
     {
-        public static string GetString(FStore store, FValueId id)
+        public static string? GetString(FStore store, FValueId id)
         {
             return id.Type switch
             {

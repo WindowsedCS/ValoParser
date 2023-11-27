@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using CUE4Parse.UE4.Assets.Exports.Texture;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
@@ -8,10 +9,9 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
 {
     public class UMaterialInstanceConstant : UMaterialInstance
     {
-        public FScalarParameterValue[] ScalarParameterValues;
-        public FTextureParameterValue[] TextureParameterValues;
-        public FVectorParameterValue[] VectorParameterValues;
-        public new FMaterialInstanceBasePropertyOverrides? BasePropertyOverrides;
+        public FScalarParameterValue[] ScalarParameterValues = Array.Empty<FScalarParameterValue>();
+        public FTextureParameterValue[] TextureParameterValues = Array.Empty<FTextureParameterValue>();
+        public FVectorParameterValue[] VectorParameterValues = Array.Empty<FVectorParameterValue>();
 
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
@@ -19,7 +19,6 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
             ScalarParameterValues = GetOrDefault(nameof(ScalarParameterValues), Array.Empty<FScalarParameterValue>());
             TextureParameterValues = GetOrDefault(nameof(TextureParameterValues), Array.Empty<FTextureParameterValue>());
             VectorParameterValues = GetOrDefault(nameof(VectorParameterValues), Array.Empty<FVectorParameterValue>());
-            BasePropertyOverrides = GetOrDefault<FMaterialInstanceBasePropertyOverrides>(nameof(BasePropertyOverrides));
         }
 
         public override void GetParams(CMaterialParams parameters)
@@ -184,6 +183,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
                 if (tex == null) continue;
 
                 if (name.Contains("detail", StringComparison.CurrentCultureIgnoreCase) ||
+                    name.Contains("ws ", StringComparison.CurrentCultureIgnoreCase) ||
                     name.Contains("_2", StringComparison.CurrentCultureIgnoreCase)) continue;
 
                 Diffuse(name.Contains("dif", StringComparison.CurrentCultureIgnoreCase), 100, tex);
@@ -242,6 +242,34 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
             // try to get diffuse texture when nothing found
             if (parameters.Diffuse == null && TextureParameterValues.Length == 1)
                 parameters.Diffuse = TextureParameterValues[0].ParameterValue.Load<UTexture>();
+        }
+
+        public override void GetParams(CMaterialParams2 parameters, EMaterialFormat format)
+        {
+            if (format != EMaterialFormat.FirstLayer && Parent != null && Parent != this)
+                Parent.GetParams(parameters, format);
+
+            parameters.AppendAllProperties(Properties);
+            base.GetParams(parameters, format);
+
+            foreach (var textureParameter in TextureParameterValues)
+            {
+                if (!textureParameter.ParameterValue.TryLoad(out UTexture texture))
+                    continue;
+
+                if (!parameters.VerifyTexture(textureParameter.Name, texture))
+                    parameters.VerifyTexture(texture.Name, texture);
+            }
+
+            foreach (var vectorParameter in VectorParameterValues)
+            {
+                if (vectorParameter.ParameterValue is not { } vector)
+                    continue;
+                parameters.Colors[vectorParameter.Name] = vector;
+            }
+
+            foreach (var scalarParameter in ScalarParameterValues)
+                parameters.Scalars[scalarParameter.Name] = scalarParameter.ParameterValue;
         }
 
         public override void AppendReferencedTextures(IList<UUnrealMaterial> outTextures, bool onlyRendered)

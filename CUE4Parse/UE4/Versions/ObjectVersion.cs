@@ -33,6 +33,15 @@ namespace CUE4Parse.UE4.Versions
         // Replace FName asset path in FSoftObjectPath with (package name, asset name) pair FTopLevelAssetPath
         FSOFTOBJECTPATH_REMOVE_ASSET_PATH_FNAMES,
 
+        // Add a soft object path list to the package summary for fast remap
+        ADD_SOFTOBJECTPATH_LIST,
+
+        // Added bulk/data resource table
+        DATA_RESOURCES,
+
+        // Added script property serialization offset to export table entries for saved, versioned packages
+        SCRIPT_SERIALIZATION_OFFSET,
+
         // -----<new versions can be added before this line>-------------------------------------------------
         // - this needs to be the last line (see note below)
         AUTOMATIC_VERSION_PLUS_ONE,
@@ -753,9 +762,9 @@ namespace CUE4Parse.UE4.Versions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 != (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 <  (int) b;
+        public static bool operator <(FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 < (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 >  (int) b;
+        public static bool operator >(FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 > (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(FPackageFileVersion a, EUnrealEngineObjectUE4Version b) => a.FileVersionUE4 <= (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -769,9 +778,9 @@ namespace CUE4Parse.UE4.Versions
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 != (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator < (FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 <  (int) b;
+        public static bool operator <(FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 < (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator > (FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 >  (int) b;
+        public static bool operator >(FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 > (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator <=(FPackageFileVersion a, EUnrealEngineObjectUE5Version b) => a.FileVersionUE5 <= (int) b;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -794,5 +803,10 @@ namespace CUE4Parse.UE4.Versions
         public static bool operator !=(FPackageFileVersion a, FPackageFileVersion b) => !(a == b);
         public override bool Equals(object? obj) => obj is FPackageFileVersion other && this == other;
         public override int GetHashCode() => HashCode.Combine(FileVersionUE4, FileVersionUE5);
+
+        public override string ToString()
+            => FileVersionUE5 >= (int) EUnrealEngineObjectUE5Version.INITIAL_VERSION
+                ? ((EUnrealEngineObjectUE5Version) FileVersionUE5).ToString()
+                : ((EUnrealEngineObjectUE4Version) FileVersionUE4).ToString();
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using CUE4Parse.UE4.Assets.Exports.Animation;
 using CUE4Parse.UE4.Assets.Exports.SkeletalMesh;
@@ -13,9 +13,10 @@ namespace CUE4Parse_Conversion.Meshes
 {
     public static class MeshConverter
     {
-        public static bool TryConvert(this USkeleton originalSkeleton, out List<CSkelMeshBone> bones)
+        public static bool TryConvert(this USkeleton originalSkeleton, out List<CSkelMeshBone> bones, out FBox box)
         {
             bones = new List<CSkelMeshBone>();
+            box = new FBox();
             for (var i = 0; i < originalSkeleton.ReferenceSkeleton.FinalRefBoneInfo.Length; i++)
             {
                 var skeletalMeshBone = new CSkelMeshBone
@@ -26,10 +27,12 @@ namespace CUE4Parse_Conversion.Meshes
                     Orientation = originalSkeleton.ReferenceSkeleton.FinalRefBonePose[i].Rotation,
                 };
 
-                if (i >= 1) // fix skeleton; all bones but 0
-                    skeletalMeshBone.Orientation.Conjugate();
+                // if (i >= 1) // fix skeleton; all bones but 0
+                //     skeletalMeshBone.Orientation.Conjugate();
 
                 bones.Add(skeletalMeshBone);
+                box.Min = skeletalMeshBone.Position.ComponentMin(box.Min);
+                box.Max = skeletalMeshBone.Position.ComponentMax(box.Max);
             }
             return true;
         }
@@ -64,19 +67,27 @@ namespace CUE4Parse_Conversion.Meshes
                     NumTexCoords = numTexCoords,
                     HasNormals = true,
                     HasTangents = true,
+                    IsTwoSided = srcLod.CardRepresentationData?.bMostlyTwoSided ?? false,
                     Indices = new Lazy<FRawStaticIndexBuffer>(srcLod.IndexBuffer!),
                     Sections = new Lazy<CMeshSection[]>(() =>
                     {
                         var sections = new CMeshSection[srcLod.Sections.Length];
                         for (var j = 0; j < sections.Length; j++)
                         {
-                            sections[j] = new CMeshSection(srcLod.Sections[j].MaterialIndex,
-                                originalMesh.StaticMaterials?[srcLod.Sections[j].MaterialIndex].MaterialSlotName.Text, // materialName
-                                originalMesh.Materials?[srcLod.Sections[j].MaterialIndex], // material
-                                srcLod.Sections[j].FirstIndex, // firstIndex
-                                srcLod.Sections[j].NumTriangles); // numFaces
-                        }
+                            int materialIndex = srcLod.Sections[j].MaterialIndex;
+                            while (materialIndex >= originalMesh.Materials.Length)
+                            {
+                                materialIndex--;
+                            }
 
+                            if (materialIndex < 0) sections[j] = new CMeshSection(srcLod.Sections[j]);
+                            else
+                            {
+                                sections[j] = new CMeshSection(materialIndex, srcLod.Sections[j],
+                                    originalMesh.StaticMaterials?[materialIndex].MaterialSlotName.Text, // materialName
+                                    originalMesh.Materials[materialIndex]); // numFaces
+                            }
+                        }
                         return sections;
                     })
                 };
@@ -147,14 +158,21 @@ namespace CUE4Parse_Conversion.Meshes
                         {
                             int materialIndex = srcLod.Sections[j].MaterialIndex;
                             if (materialIndex < 0) // UE4 using Clamp(0, Materials.Num()), not Materials.Num()-1
+                            {
                                 materialIndex = 0;
+                            }
+                            else while (materialIndex >= originalMesh.Materials?.Length)
+                            {
+                                materialIndex--;
+                            }
 
-                            var materialName = materialIndex < originalMesh.Materials?.Length
-                                ? originalMesh.Materials[materialIndex].MaterialSlotName.Text : null;
-                            var material = materialIndex < originalMesh.Materials?.Length
-                                ? originalMesh.Materials[materialIndex].Material : null;
-                            sections[j] = new CMeshSection(materialIndex, materialName, material, srcLod.Sections[j].BaseIndex,
-                                srcLod.Sections[j].NumTriangles);
+                            if (materialIndex < 0) sections[j] = new CMeshSection(srcLod.Sections[j]);
+                            else
+                            {
+                                sections[j] = new CMeshSection(materialIndex, srcLod.Sections[j],
+                                    originalMesh.SkeletalMaterials[materialIndex].MaterialSlotName.Text,
+                                    originalMesh.SkeletalMaterials[materialIndex].Material);
+                            }
                         }
 
                         return sections;
@@ -249,7 +267,8 @@ namespace CUE4Parse_Conversion.Meshes
 
                     var i2 = 0;
                     uint packedWeights = 0;
-                    for (var j = 0; j < 4; j++)
+                    var len = Math.Min(v.Infs.BoneWeight.Length, 4);
+                    for (var j = 0; j < len; j++)
                     {
                         uint boneWeight = v.Infs.BoneWeight[j];
                         if (boneWeight == 0) continue; // skip this influence (but do not stop the loop!)
@@ -276,8 +295,8 @@ namespace CUE4Parse_Conversion.Meshes
                     Orientation = originalMesh.ReferenceSkeleton.FinalRefBonePose[i].Rotation
                 };
 
-                if (i >= 1) // fix skeleton; all bones but 0
-                    skeletalMeshBone.Orientation.Conjugate();
+                // if (i >= 1) // fix skeleton; all bones but 0
+                //     skeletalMeshBone.Orientation.Conjugate();
 
                 convertedMesh.RefSkeleton.Add(skeletalMeshBone);
             }

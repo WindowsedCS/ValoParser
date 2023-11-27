@@ -38,7 +38,7 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                 else
                 {
                     var tempTangents = Array.Empty<FPackedNormal[]>();
-                    if (Ar.Game == EGame.GAME_StarWarsJediFallenOrder && Ar.ReadBoolean()) // bDropNormals
+                    if (Ar.Game is EGame.GAME_StarWarsJediFallenOrder or EGame.GAME_StarWarsJediSurvivor && Ar.ReadBoolean()) // bDropNormals
                     {
                         goto texture_coordinates;
                     }
@@ -69,7 +69,7 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                         UV = new FStaticMeshUVItem[NumVertices];
                         for (var i = 0; i < NumVertices; i++)
                         {
-                            if (Ar.Game == EGame.GAME_StarWarsJediFallenOrder && tempTangents.Length == 0)
+                            if (Ar.Game is EGame.GAME_StarWarsJediFallenOrder or EGame.GAME_StarWarsJediSurvivor && tempTangents.Length == 0)
                             {
                                 UV[i] = new FStaticMeshUVItem(new [] { new FPackedNormal(0), new FPackedNormal(0), new FPackedNormal(0) }, uv[i]);
                             }
@@ -78,43 +78,14 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                                 UV[i] = new FStaticMeshUVItem(tempTangents[i], uv[i]);
                             }
                         }
+
+                        if (Ar.Game == EGame.GAME_TorchlightInfinite) Ar.SkipBulkArrayData();
                 }
             }
             else
             {
                 UV = Array.Empty<FStaticMeshUVItem>();
             }
-        }
-    }
-
-    public class FStaticMeshVertexBufferConverter : JsonConverter<FStaticMeshVertexBuffer>
-    {
-        public override void WriteJson(JsonWriter writer, FStaticMeshVertexBuffer value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("NumTexCoords");
-            writer.WriteValue(value.NumTexCoords);
-
-            writer.WritePropertyName("NumVertices");
-            writer.WriteValue(value.NumVertices);
-
-            writer.WritePropertyName("Strides");
-            writer.WriteValue(value.Strides);
-
-            writer.WritePropertyName("UseHighPrecisionTangentBasis");
-            writer.WriteValue(value.UseHighPrecisionTangentBasis);
-
-            writer.WritePropertyName("UseFullPrecisionUVs");
-            writer.WriteValue(value.UseFullPrecisionUVs);
-
-            writer.WriteEndObject();
-        }
-
-        public override FStaticMeshVertexBuffer ReadJson(JsonReader reader, Type objectType, FStaticMeshVertexBuffer existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -4,15 +4,15 @@ using CUE4Parse.UE4.Readers;
 namespace CUE4Parse.UE4.Versions
 {
     // Custom serialization version for changes made in the //Fortnite/Main stream
-    public class FFortniteMainBranchObjectVersion
+    public static class FFortniteMainBranchObjectVersion
     {
         public enum Type
         {
             // Before any version changes were made
-            BeforeCustomVersionWasAdded = 0,
+		    BeforeCustomVersionWasAdded = 0,
 
-            // World composition tile offset changed from 2d to 3d
-            WorldCompositionTile3DOffset,
+		    // World composition tile offset changed from 2d to 3d
+		    WorldCompositionTile3DOffset,
 
 		    // Minor material serialization optimization
 		    MaterialInstanceSerializeOptimization_ShaderFName,
@@ -225,6 +225,167 @@ namespace CUE4Parse.UE4.Versions
 		    // if a widget exposes its named slot to everyone (even if it has content), which by default they wont any longer.
 		    WidgetInheritedNamedSlots,
 
+		    // Added water HLOD material
+		    WaterHLODSupportAdded,
+
+		    // Moved parameters affecting Skeleton pose rendering from the PoseWatch class to the PoseWatchPoseElement class.
+		    PoseWatchMigrateSkeletonDrawParametersToPoseElement,
+
+		    // Reset default value for Water exclusion volumes to make them more intuitive and support the "it just works" philosophy.
+		    WaterExclusionVolumeExcludeAllDefault,
+
+		    // Added water non-tessellated LOD
+		    WaterNontessellatedLODSupportAdded,
+
+		    // Added FHierarchicalSimplification::SimplificationMethod
+		    HierarchicalSimplificationMethodEnumAdded,
+
+		    // Changed how world partition streaming cells are named
+		    WorldPartitionStreamingCellsNamingShortened,
+
+		    // Serialize ContentBundleGuid in WorldPartitionActorDesc
+		    WorldPartitionActorDescSerializeContentBundleGuid,
+
+		    // Serialize IsActorRuntimeOnly in WorldPartitionActorDesc
+		    WorldPartitionActorDescSerializeActorIsRuntimeOnly,
+
+		    // Add Nanite Material Override option to materials and material instances.
+		    NaniteMaterialOverride,
+
+		    // Serialize HLOD stats in HLODActorDesc
+		    WorldPartitionHLODActorDescSerializeStats,
+
+		    // WorldPartitionStreamingSourceComponent property deprecation
+		    WorldPartitionStreamingSourceComponentTargetDeprecation,
+
+		    // Fixed localization gathering for external actor packages
+		    FixedLocalizationGatherForExternalActorPackage,
+
+		    // Change HLODActors to RuntimeCells mapping to use a GUID instead of the cell name
+		    WorldPartitionHLODActorUseSourceCellGuid,
+
+		    // Add an attribute to geometry collection to track internal faces, rather than relying on material ID numbering
+		    ChaosGeometryCollectionInternalFacesAttribute,
+
+		    // Dynamic cast nodes use an enumerated pure node state to include a value for the default setting
+		    DynamicCastNodesUsePureStateEnum,
+
+		    // Add FWorldPartitionActorFilter to FLevelInstanceActorDesc/FDataLayerInstanceDesc
+		    WorldPartitionActorFilter,
+
+		    // Change the non-spatialized radius to blend to a pure 2D spatialized sound vs omnidirectional
+		    AudioAttenuationNonSpatializedRadiusBlend,
+
+		    // Serialize actor class descriptors
+		    WorldPartitionActorClassDescSerialize,
+
+		    // FActorContainerID is now an FGuid instead of a uint64
+		    WorldPartitionFActorContainerIDu64ToGuid,
+
+		    // FDataLayerInstanceDesc support for private data layers
+		    WorldPartitionPrivateDataLayers,
+
+		    // Reduce size and improve behaviour of Chaos::FImplicitObjectUnion
+		    ChaosImplicitObjectUnionBVHRefactor,
+
+		    // FLevelInstanceActorDesc DeltaSerialize Filter
+		    LevelInstanceActorDescDeltaSerializeFilter,
+
+		    // Fix the Nanite landscape mesh non-deterministic DDC keys
+		    FixNaniteLandscapeMeshDDCKey,
+
+		    // Change how connection graphs are stored on Geometry Collections to an edge-array representation
+		    ChaosGeometryCollectionConnectionEdgeGroup,
+
+		    // Moved the water info mesh data and static water body meshes into new static mesh components for water bodies.
+		    WaterBodyStaticMeshComponents,
+
+		    // Serialize invalid bounds in world partition actor descriptors
+		    WorldPartitionActorDescSerializeInvalidBounds,
+
+		    // Upgrade Navigation Links to use 64 bits for the ID
+		    NavigationLinkID32To64,
+
+		    // Serialize editor only references in world partition actor descriptors
+		    WorldPartitionActorDescSerializeEditorOnlyReferences,
+
+		    // Add support for soft object paths in actor descriptors
+		    WorldPartitionActorDescSerializeSoftObjectPathSupport,
+
+		    // Don't serialize class descriptor GUIDs
+		    WorldPartitionClasDescGuidTransient,
+
+		    // Serialize ActorDesc bIsMainWorldOnly
+		    WorldPartitionActorDescIsMainWorldOnly,
+
+		    // FWorldPartitionActorFilter go back to FString serialize of AssetPaths to avoid FArchiveReplaceOrClearExternalReferences clearing CDO references on BP Compile
+		    WorldPartitionActorFilterStringAssetPath,
+
+		    // Add FPackedLevelActorDesc for APackedLevelActor and support for APackedLevelActor Filters
+		    PackedLevelActorDesc,
+
+		    // Add customizable values for several UWorldPartitionRuntimeSpatialHash cvars
+		    WorldPartitionRuntimeSpatialHashCVarOverrides,
+
+		    // WorldPartition HLOD now contains a source actors object
+		    WorldPartitionHLODSourceActorsRefactor,
+
+		    WaterBodyStaticMeshRename,
+
+		    // Geometry Collection now by-default converts vertex colors to sRGB when creating render data
+		    GeometryCollectionConvertVertexColorToSRGB,
+
+		    // Water bodies before this version need to update their water zone on load since they won't have been serialized yet.
+		    WaterOwningZonePointerFixup,
+
+		    // Set flags on water static meshes to duplicate transient to avoid underlying static mesh duplication issue
+		    WaterBodyStaticMeshDuplicateTransient,
+
+		    // Update paths to use the SkeletalClass
+		    MVVMConvertPropertyPathToSkeletalClass,
+
+		    // Fixup all flags/outering on static meshes on water bodies by rebuilding them completely
+		    WaterBodyStaticMeshFixup,
+
+		    // Binding extensions for anim graph nodes
+		    AnimGraphNodeBindingExtensions,
+
+		    // Function data stores a map from work to debug operands
+		    RigVMSaveDebugMapInGraphFunctionData,
+
+		    // Fix missing binding extensions for some anim graph nodes
+		    FixMissingAnimGraphNodeBindingExtensions,
+
+		    // EditableWhenInherited: Skip custom serialization on non Archetypes
+		    ISMComponentEditableWhenInheritedSkipSerialization,
+
+		    // GrassTypes are now per-component, rather than per-landscape proxy :
+		    LandscapeSupportPerComponentGrassTypes,
+
+		    // World partition actor data layers activation logic operator support defaults for old maps
+		    WorldPartitionDataLayersLogicOperatorAdded,
+
+		    // Started sorting Possessables, Spawnables, and MovieSceneBindings for better search performance.
+		    MovieSceneSortedBindings,
+
+		    // Remove the UAnimCurveCompressionCodec::InstanceGuid which causes cook determinism issues
+		    RemoveAnimCurveCompressionCodecInstanceGuid,
+
+		    // Serialize the source HLOD Layer for HLOD actor descriptors.
+		    WorldPartitionHLODActorDescSerializeSourceHLODLayer,
+
+		    // Serialize custom editor bounds for HLOD actor descriptors.
+		    WorldPartitionHLODActorDescSerializeEditorBounds,
+
+		    // Changed default Local Exposure Contrast from 1.0 to 0.8 (reverted)
+		    LocalExposureDefaultChangeFrom1_Reverted,
+
+		    // Added support of external packaging of Data Layer Instances
+		    AddDataLayerInstanceExternalPackage,
+
+		    // Update paths to keep a flag if they are the widget BP
+		    MVVMPropertyPathSelf,
+
 		    // -----<new versions can be added above this line>-------------------------------------------------
 		    VersionPlusOne,
 		    LatestVersion = VersionPlusOne - 1
@@ -247,7 +408,11 @@ namespace CUE4Parse.UE4.Versions
                 < EGame.GAME_UE4_24 => Type.SupportVirtualBoneInRetargeting,
                 < EGame.GAME_UE4_26 => Type.AnimLayerGuidConformation,
                 < EGame.GAME_UE4_27 => Type.ChaosSolverPropertiesMoved,
-                < EGame.GAME_UE5_0 => Type.BPGCCookedEditorTags,
+                < EGame.GAME_UE5_0 => Type.RemoveLandscapeWaterInfo,
+                < EGame.GAME_UE5_1 => Type.GravityOverrideDefinedInWorldSpace,
+                < EGame.GAME_UE5_2 => Type.WorldPartitionHLODActorDescSerializeStats,
+                < EGame.GAME_UE5_3 => Type.WorldPartitionHLODActorUseSourceCellGuid,
+                < EGame.GAME_UE5_4 => Type.WaterBodyStaticMeshFixup,
                 _ => Type.LatestVersion
             };
         }

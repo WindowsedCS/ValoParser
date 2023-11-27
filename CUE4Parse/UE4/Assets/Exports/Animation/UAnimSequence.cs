@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using CUE4Parse.UE4.Assets.Exports.Animation.ACL;
 using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
@@ -43,6 +44,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
         public FTransform[]? RetargetSourceAssetReferencePose;
 
         public bool bUseRawDataOnly;
+        public bool EnsuredCurveData;
 
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
@@ -54,7 +56,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
             AdditiveAnimType = GetOrDefault<EAdditiveAnimationType>(nameof(AdditiveAnimType));
             RefPoseType = GetOrDefault<EAdditiveBasePoseType>(nameof(RefPoseType));
             RefPoseSeq = GetOrDefault<ResolvedObject>(nameof(RefPoseSeq));
-            RefFrameIndex = GetOrDefault(nameof(RefFrameIndex), -1);
+            RefFrameIndex = GetOrDefault(nameof(RefFrameIndex), 0);
             RetargetSource = GetOrDefault<FName>(nameof(RetargetSource));
             RetargetSourceAssetReferencePose = GetOrDefault<FTransform[]>(nameof(RetargetSourceAssetReferencePose));
 
@@ -118,6 +120,8 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
                     bUseRawDataOnly = Ar.ReadBoolean();
                 }
             }
+
+            EnsuredCurveData = EnsureCurveData();
         }
 
         protected internal override void WriteJson(JsonWriter writer, JsonSerializer serializer)
@@ -155,7 +159,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
                 writer.WriteValue(CompressedCurveByteStream);
             }*/
 
-            if (EnsureCurveData())
+            if (EnsuredCurveData)
             {
                 writer.WritePropertyName("CompressedCurveData");
                 serializer.Serialize(writer, CompressedCurveData);
@@ -223,7 +227,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
                 CompressedCurveNames = Ar.ReadArray(() => new FSmartName(Ar));
             }
 
-            if (Ar.Game >= EGame.GAME_UE4_17)
+            if (Ar.Versions["AnimSequence.HasCompressedRawSize"])
             {
                 // UE4.17+
                 CompressedRawDataSize = Ar.Read<int>();
@@ -234,8 +238,24 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
                 compressedData.CompressedNumberOfFrames = Ar.Read<int>();
             }
 
-            // compressed data
-            compressedData.CompressedByteStream = Ar.ReadBytes(Ar.Read<int>());
+            var nameIndex = Ar.Read<int>();//ACL thing - KeyEncodingFormat FName
+            Ar.Position -= 4;
+            if (nameIndex >= 0 && nameIndex < Ar.Owner.NameMap.Length)
+            {
+                var format = Ar.ReadFName();
+                if ("AKF_" + format.Text != compressedData.KeyEncodingFormat.ToString() && !format.Text.StartsWith("ACL")) Ar.Position -= 8;
+                compressedData.CompressedByteStream = Ar.ReadBytes(Ar.Read<int>());
+                if (format.Text.StartsWith("ACL"))
+                {
+                    CompressedDataStructure = new UAnimBoneCompressionCodec_ACLSafe().AllocateAnimData();
+                    CompressedDataStructure.Bind(compressedData.CompressedByteStream);
+                }
+            }
+            else
+            {
+                // compressed data
+                compressedData.CompressedByteStream = Ar.ReadBytes(Ar.Read<int>());
+            }
 
             if (Ar.Game >= EGame.GAME_UE4_22)
             {
@@ -336,8 +356,8 @@ namespace CUE4Parse.UE4.Assets.Exports.Animation
             return RefPoseType switch
             {
                 EAdditiveBasePoseType.ABPT_RefPose => true,
-                EAdditiveBasePoseType.ABPT_AnimScaled => RefPoseSeq != null,
-                EAdditiveBasePoseType.ABPT_AnimFrame => RefPoseSeq != null && RefFrameIndex >= 0,
+                EAdditiveBasePoseType.ABPT_AnimScaled => RefPoseSeq != null && RefPoseSeq.Name.Text != Name,
+                EAdditiveBasePoseType.ABPT_AnimFrame => RefPoseSeq != null && RefPoseSeq.Name.Text != Name && RefFrameIndex >= 0,
                 EAdditiveBasePoseType.ABPT_LocalAnimFrame => RefFrameIndex >= 0,
                 _ => false
             };

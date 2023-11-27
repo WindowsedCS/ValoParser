@@ -5,11 +5,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets.Objects;
+using CUE4Parse.UE4.Assets.Objects.Properties;
 using CUE4Parse.UE4.Assets.Objects.Unversioned;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Exceptions;
 using CUE4Parse.UE4.Objects.Core.Misc;
 using CUE4Parse.UE4.Objects.UObject;
+using CUE4Parse.UE4.Versions;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -82,6 +84,11 @@ namespace CUE4Parse.UE4.Assets.Exports
             {
                 ObjectGuid = Ar.Read<FGuid>();
             }
+
+            if (Ar.Game >= EGame.GAME_UE5_0 && (Flags.HasFlag(EObjectFlags.RF_ClassDefaultObject) || Flags.HasFlag(EObjectFlags.RF_DefaultSubObject)))
+            {
+                Ar.Position += 4; // No idea honestly
+            }
         }
 
         /**
@@ -101,8 +108,9 @@ namespace CUE4Parse.UE4.Assets.Exports
         public void GetFullName(UObject? stopOuter, StringBuilder resultString, bool includeClassPackage = false)
         {
             resultString.Append(includeClassPackage ? Class?.GetPathName() : ExportType);
-            resultString.Append(' ');
+            resultString.Append('\'');
             GetPathName(stopOuter, resultString);
+            resultString.Append('\'');
         }
 
         /**
@@ -267,18 +275,25 @@ namespace CUE4Parse.UE4.Assets.Exports
                 writer.WriteValue(Outer.Name); // TODO serialize the path too
             }
 
+            // class
+            if (Class != null)
+            {
+                writer.WritePropertyName("Class");
+                writer.WriteValue(Class.GetFullName());
+            }
+
             // super
             if (Super != null)
             {
                 writer.WritePropertyName("Super");
-                writer.WriteValue(Super.Name.Text);
+                serializer.Serialize(writer, Super);
             }
 
             // template
             if (Template != null)
             {
                 writer.WritePropertyName("Template");
-                writer.WriteValue(Template.Name.Text);
+                serializer.Serialize(writer, Template);
             }
 
             // export properties
@@ -400,7 +415,7 @@ namespace CUE4Parse.UE4.Assets.Exports
             return IsFullNameStableForNetworking();
         }
 
-        public override string ToString() => GetFullName();
+        public override string ToString() => Name;
     }
 
     public static class PropertyUtil
@@ -461,22 +476,6 @@ namespace CUE4Parse.UE4.Assets.Exports
                 return cast;
             }
             throw new NullReferenceException($"Couldn't get property of type {typeof(T).Name} at index '{index}' in {holder.GetType().Name}");
-        }
-    }
-
-    public class UObjectConverter : JsonConverter<UObject>
-    {
-        public override void WriteJson(JsonWriter writer, UObject value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-            value.WriteJson(writer, serializer);
-            writer.WriteEndObject();
-        }
-
-        public override UObject ReadJson(JsonReader reader, Type objectType, UObject existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
         }
     }
 

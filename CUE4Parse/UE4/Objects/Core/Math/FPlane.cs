@@ -41,6 +41,30 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             W = @base | normal;
         }
 
+        public FPlane(float x, float y, float z, float w) : this()
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+
+        public FPlane(TIntVector3<float> vector, float w) : this()
+        {
+            X = vector.X;
+            Y = vector.Y;
+            Z = vector.Z;
+            W = w;
+        }
+
+        public FPlane(TIntVector3<double> vector, double w) : this()
+        {
+            X = (float) vector.X;
+            Y = (float) vector.Y;
+            Z = (float) vector.Z;
+            W = (float) w;
+        }
+
         public FPlane(FArchive Ar)
         {
             Vector = new FVector(Ar);

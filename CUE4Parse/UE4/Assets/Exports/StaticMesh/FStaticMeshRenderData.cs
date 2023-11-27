@@ -1,4 +1,4 @@
-using System;
+using CUE4Parse.UE4.Assets.Exports.Nanite;
 using CUE4Parse.UE4.Assets.Readers;
 using CUE4Parse.UE4.Objects.Core.Math;
 using CUE4Parse.UE4.Objects.Engine;
@@ -23,11 +23,12 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
         {
             if (!bCooked) return;
 
-            // TODO Read minMobileLODIdx only when platform is desktop and CVar r.StaticMesh.KeepMobileMinLODSettingOnDesktop is nonzero
             if (Ar.Versions["StaticMesh.KeepMobileMinLODSettingOnDesktop"])
             {
                 var minMobileLODIdx = Ar.Read<int>();
             }
+
+            if (Ar.Game == EGame.GAME_HYENAS) Ar.Position += 1;
 
             LODs = Ar.ReadArray(() => new FStaticMeshLODResources(Ar));
             if (Ar.Game >= EGame.GAME_UE4_23)
@@ -63,11 +64,11 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                         {
                             if (Ar.Game >= EGame.GAME_UE5_0)
                             {
-                                var _ = new FDistanceFieldVolumeData5(Ar);
+                                _ = new FDistanceFieldVolumeData5(Ar);
                             }
                             else
                             {
-                                var _ = new FDistanceFieldVolumeData(Ar);
+                                _ = new FDistanceFieldVolumeData(Ar);
                             }
                         }
                     }
@@ -99,6 +100,8 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                 }
 
                 ScreenSize[i] = Ar.Read<float>();
+
+                if (Ar.Game == EGame.GAME_HogwartsLegacy) Ar.Position +=8;
             }
 
             if (Ar.Game == EGame.GAME_Borderlands3)
@@ -129,40 +132,6 @@ namespace CUE4Parse.UE4.Assets.Exports.StaticMesh
                     }
                 }
             }
-        }
-    }
-
-    public class FStaticMeshRenderDataConverter : JsonConverter<FStaticMeshRenderData>
-    {
-        public override void WriteJson(JsonWriter writer, FStaticMeshRenderData value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-
-            writer.WritePropertyName("LODs");
-            serializer.Serialize(writer, value.LODs);
-
-            if (value.NaniteResources != null)
-            {
-                writer.WritePropertyName("NaniteResources");
-                serializer.Serialize(writer, value.NaniteResources);
-            }
-
-            writer.WritePropertyName("Bounds");
-            serializer.Serialize(writer, value.Bounds);
-
-            writer.WritePropertyName("bLODsShareStaticLighting");
-            writer.WriteValue(value.bLODsShareStaticLighting);
-
-            writer.WritePropertyName("ScreenSize");
-            serializer.Serialize(writer, value.ScreenSize);
-
-            writer.WriteEndObject();
-        }
-
-        public override FStaticMeshRenderData ReadJson(JsonReader reader, Type objectType, FStaticMeshRenderData existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
         }
     }
 }

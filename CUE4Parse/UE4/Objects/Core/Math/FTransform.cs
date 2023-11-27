@@ -8,9 +8,9 @@ using static System.MathF;
 namespace CUE4Parse.UE4.Objects.Core.Math
 {
     [StructFallback]
-    public class FTransform
+    public class FTransform : ICloneable
     {
-        public static FTransform Identity = new() { Rotation = FQuat.Identity, Translation = FVector.ZeroVector, Scale3D = new FVector(1, 1, 1) };
+        public static FTransform Identity = new() { Rotation = FQuat.Identity, Translation = FVector.ZeroVector, Scale3D = FVector.OneVector };
 
         public FQuat Rotation;
         public FVector Translation;
@@ -422,5 +422,15 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             EAxis.Y => TransformVectorNoScale(new FVector(0.0f, 1.0f, 0.0f)),
             _ => TransformVectorNoScale(new FVector(0.0f, 0.0f, 1.0f))
         };
+
+        public override string ToString()
+        {
+            return $"{{T:{Translation} R:{Rotation} S:{Scale3D}}}";
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

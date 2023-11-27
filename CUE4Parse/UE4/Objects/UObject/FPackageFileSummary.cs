@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
@@ -33,17 +32,20 @@ namespace CUE4Parse.UE4.Objects.UObject
     {
         public const uint PACKAGE_FILE_TAG = 0x9E2A83C1U;
         public const uint PACKAGE_FILE_TAG_SWAPPED = 0xC1832A9EU;
+        public const uint PACKAGE_FILE_TAG_ACE7 = 0x37454341U; // ACE7
         private const uint PACKAGE_FILE_TAG_ONE = 0x00656E6FU; // SOD2
 
         public readonly uint Tag;
         public FPackageFileVersion FileVersionUE;
         public EUnrealEngineObjectLicenseeUEVersion FileVersionLicenseeUE;
-        public FCustomVersion[] CustomVersionContainer;
+        public FCustomVersionContainer CustomVersionContainer;
         public EPackageFlags PackageFlags;
         public int TotalHeaderSize;
         public readonly string FolderName;
         public int NameCount;
         public readonly int NameOffset;
+        public readonly int SoftObjectPathsCount;
+        public readonly int SoftObjectPathsOffset;
         public readonly string? LocalizationId;
         public readonly int GatherableTextDataCount;
         public readonly int GatherableTextDataOffset;
@@ -72,10 +74,11 @@ namespace CUE4Parse.UE4.Objects.UObject
         public readonly int PreloadDependencyOffset;
         public readonly int NamesReferencedFromExportDataCount;
         public readonly long PayloadTocOffset;
+        public readonly int DataResourceOffset;
 
         public FPackageFileSummary()
         {
-            CustomVersionContainer = Array.Empty<FCustomVersion>();
+            CustomVersionContainer = new FCustomVersionContainer();
             FolderName = string.Empty;
             Generations = Array.Empty<FGenerationInfo>();
             ChunkIds = Array.Empty<int>();
@@ -109,7 +112,7 @@ namespace CUE4Parse.UE4.Objects.UObject
                 legacyFileVersion = Ar.Read<int>(); // seems to be always int.MinValue
                 bUnversioned = true;
                 FileVersionUE = Ar.Ver;
-                CustomVersionContainer = Array.Empty<FCustomVersion>();
+                CustomVersionContainer = new FCustomVersionContainer();
                 FolderName = "None";
                 PackageFlags = EPackageFlags.PKG_FilterEditorOnly;
                 goto afterPackageFlags;
@@ -156,11 +159,11 @@ namespace CUE4Parse.UE4.Objects.UObject
                 }
 
                 FileVersionLicenseeUE = Ar.Read<EUnrealEngineObjectLicenseeUEVersion>();
-                CustomVersionContainer = legacyFileVersion <= -2 ? Ar.ReadArray<FCustomVersion>() : Array.Empty<FCustomVersion>();
+                CustomVersionContainer = legacyFileVersion <= -2 ? new FCustomVersionContainer(Ar) : new FCustomVersionContainer();
 
-                if (Ar.Versions.CustomVersions == null && CustomVersionContainer.Length > 0)
+                if (Ar.Versions.CustomVersions == null && CustomVersionContainer.Versions.Length > 0)
                 {
-                    Ar.Versions.CustomVersions = CustomVersionContainer.ToList();
+                    Ar.Versions.CustomVersions = CustomVersionContainer;
                 }
 
                 if (FileVersionUE.FileVersionUE4 == 0 && FileVersionUE.FileVersionUE5 == 0 && FileVersionLicenseeUE == 0)
@@ -198,6 +201,12 @@ namespace CUE4Parse.UE4.Objects.UObject
             afterPackageFlags:
             NameCount = Ar.Read<int>();
             NameOffset = Ar.Read<int>();
+
+            if (FileVersionUE >= EUnrealEngineObjectUE5Version.ADD_SOFTOBJECTPATH_LIST)
+            {
+                SoftObjectPathsCount = Ar.Read<int>();
+                SoftObjectPathsOffset = Ar.Read<int>();
+            }
 
             if (!PackageFlags.HasFlag(EPackageFlags.PKG_FilterEditorOnly))
             {
@@ -239,7 +248,7 @@ namespace CUE4Parse.UE4.Objects.UObject
 
             ThumbnailTableOffset = Ar.Read<int>();
 
-            if (Ar.Game == EGame.GAME_Valorant) Ar.Position += 8;
+            if (Ar.Game is EGame.GAME_Valorant or EGame.GAME_HYENAS) Ar.Position += 8;
 
             Guid = Ar.Read<FGuid>();
 
@@ -311,6 +320,11 @@ namespace CUE4Parse.UE4.Objects.UObject
 
             PackageSource = Ar.Read<int>();
 
+            if (Ar.Game == EGame.GAME_ArkSurvivalEvolved && (int) FileVersionLicenseeUE >= 10)
+            {
+                Ar.Position += 8;
+            }
+
             // No longer used: List of additional packages that are needed to be cooked for this package (ie streaming levels)
             // Keeping the serialization code for backwards compatibility without bumping the package version
             var additionalPackagesToCook = Ar.ReadArray(Ar.ReadFString);
@@ -344,7 +358,7 @@ namespace CUE4Parse.UE4.Objects.UObject
                 AssetRegistryDataOffset = (int)(AssetRegistryDataOffset ^ 0xEEB2CEC7);
             }
 
-            if (Ar.Game == EGame.GAME_SeaOfThieves)
+            if (Ar.Game is EGame.GAME_SeaOfThieves or EGame.GAME_GearsOfWar4)
             {
                 Ar.Position += 6; // no idea what's going on here.
             }
@@ -386,6 +400,7 @@ namespace CUE4Parse.UE4.Objects.UObject
 
             NamesReferencedFromExportDataCount = FileVersionUE >= EUnrealEngineObjectUE5Version.NAMES_REFERENCED_FROM_EXPORT_DATA ? Ar.Read<int>() : NameCount;
             PayloadTocOffset = FileVersionUE >= EUnrealEngineObjectUE5Version.PAYLOAD_TOC ? Ar.Read<long>() : -1;
+            DataResourceOffset = FileVersionUE >= EUnrealEngineObjectUE5Version.DATA_RESOURCES ? Ar.Read<int>() : -1;
 
             if (Tag == PACKAGE_FILE_TAG_ONE && Ar is FAssetArchive assetAr)
             {
@@ -396,10 +411,7 @@ namespace CUE4Parse.UE4.Objects.UObject
         private static void FixCorruptEngineVersion(FPackageFileVersion objectVersion, FEngineVersion version)
         {
             if (objectVersion < EUnrealEngineObjectUE4Version.CORRECT_LICENSEE_FLAG
-                && version.Major == 4
-                && version.Minor == 26
-                && version.Patch == 0
-                && version.Changelist >= 12740027
+                && version is { Major: 4, Minor: 26, Patch: 0, Changelist: >= 12740027 }
                 && version.IsLicenseeVersion())
             {
                 version.Set(4, 26, 0, version.Changelist, version.Branch);

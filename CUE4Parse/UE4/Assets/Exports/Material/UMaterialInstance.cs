@@ -1,3 +1,4 @@
+using System;
 using CUE4Parse.UE4.Assets.Exports.Material.Parameters;
 using CUE4Parse.UE4.Assets.Objects;
 using CUE4Parse.UE4.Assets.Readers;
@@ -13,7 +14,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
         private ResolvedObject? _parent;
         public UUnrealMaterial? Parent => _parent?.Load<UUnrealMaterial>();
         public bool bHasStaticPermutationResource;
-        public FMaterialInstanceBasePropertyOverrides BasePropertyOverrides;
+        public FMaterialInstanceBasePropertyOverrides? BasePropertyOverrides;
         public FStaticParameterSet? StaticParameters;
         public FStructFallback? CachedData;
 
@@ -23,7 +24,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
             _parent = GetOrDefault<ResolvedObject>(nameof(Parent));
             bHasStaticPermutationResource = GetOrDefault<bool>("bHasStaticPermutationResource");
             BasePropertyOverrides = GetOrDefault<FMaterialInstanceBasePropertyOverrides>(nameof(BasePropertyOverrides));
-            StaticParameters = GetOrDefault<FStaticParameterSet>(nameof(StaticParameters));
+            StaticParameters = GetOrDefault(nameof(StaticParameters), GetOrDefault<FStaticParameterSet>("StaticParametersRuntime"));
 
             var bSavedCachedData = FUE5MainStreamObjectVersion.Get(Ar) >= FUE5MainStreamObjectVersion.Type.MaterialSavedCachedData && Ar.ReadBoolean();
             if (bSavedCachedData)
@@ -53,6 +54,21 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
 #endif
         }
 
+        public override void GetParams(CMaterialParams2 parameters, EMaterialFormat format)
+        {
+            base.GetParams(parameters, format);
+
+            if (StaticParameters != null)
+                foreach (var switchParameter in StaticParameters.StaticSwitchParameters)
+                    parameters.Switches[switchParameter.Name] = switchParameter.Value;
+
+            if (BasePropertyOverrides != null)
+            {
+                parameters.BlendMode = BasePropertyOverrides.BlendMode;
+                parameters.ShadingModel = BasePropertyOverrides.ShadingModel;
+            }
+        }
+
         protected internal override void WriteJson(JsonWriter writer, JsonSerializer serializer)
         {
             base.WriteJson(writer, serializer);
@@ -71,7 +87,7 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
         public FStaticSwitchParameter[] StaticSwitchParameters;
         public FStaticComponentMaskParameter[] StaticComponentMaskParameters;
         public FStaticTerrainLayerWeightParameter[] TerrainLayerWeightParameters;
-        public FStaticMaterialLayersParameter[] MaterialLayersParameters;
+        public FStaticMaterialLayersParameter[]? MaterialLayersParameters;
 
         public FStaticParameterSet(FArchive Ar)
         {
@@ -87,7 +103,10 @@ namespace CUE4Parse.UE4.Assets.Exports.Material
 
         public FStaticParameterSet(FStructFallback fallback)
         {
-            StaticSwitchParameters = fallback.GetOrDefault<FStaticSwitchParameter[]>(nameof(StaticSwitchParameters));
+            StaticSwitchParameters = fallback.GetOrDefault(nameof(StaticSwitchParameters), Array.Empty<FStaticSwitchParameter>());
+            StaticComponentMaskParameters = fallback.GetOrDefault(nameof(StaticComponentMaskParameters), Array.Empty<FStaticComponentMaskParameter>());
+            TerrainLayerWeightParameters = fallback.GetOrDefault(nameof(TerrainLayerWeightParameters), Array.Empty<FStaticTerrainLayerWeightParameter>());
+            MaterialLayersParameters = fallback.GetOrDefault(nameof(MaterialLayersParameters), Array.Empty<FStaticMaterialLayersParameter>());
         }
     }
 }

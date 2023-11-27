@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using CUE4Parse_Conversion.Materials;
 
 namespace CUE4Parse_Conversion.Meshes
@@ -9,29 +10,31 @@ namespace CUE4Parse_Conversion.Meshes
     {
         public readonly string FileName;
         public readonly byte[] FileData;
-        public readonly List<MaterialExporter> Materials;
+        public readonly List<MaterialExporter2> Materials;
 
-        public Mesh(string fileName, byte[] fileData, List<MaterialExporter> materials)
+        public Mesh(string fileName, byte[] fileData, List<MaterialExporter2> materials)
         {
             FileName = fileName;
             FileData = fileData;
             Materials = materials;
         }
 
-        public override bool TryWriteToDir(DirectoryInfo baseDirectory, out string savedFileName)
+        private readonly object _material = new ();
+        public override bool TryWriteToDir(DirectoryInfo baseDirectory, out string label, out string savedFilePath)
         {
-            savedFileName = string.Empty;
+            label = string.Empty;
+            savedFilePath = string.Empty;
             if (!baseDirectory.Exists || FileData.Length <= 0) return false;
 
-            foreach (var material in Materials)
+            Parallel.ForEach(Materials, material =>
             {
-                material.TryWriteToDir(baseDirectory, out _);
-            }
+                lock (_material) material.TryWriteToDir(baseDirectory, out _, out _);
+            });
 
-            var filePath = FixAndCreatePath(baseDirectory, FileName);
-            File.WriteAllBytes(filePath, FileData);
-            savedFileName = Path.GetFileName(filePath);
-            return File.Exists(filePath);
+            savedFilePath = FixAndCreatePath(baseDirectory, FileName);
+            File.WriteAllBytes(savedFilePath, FileData);
+            label = Path.GetFileName(savedFilePath);
+            return File.Exists(savedFilePath);
         }
 
         public override bool TryWriteToZip(out byte[] zipFile)

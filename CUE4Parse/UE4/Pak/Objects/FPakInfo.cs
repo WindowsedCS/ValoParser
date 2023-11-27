@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using CUE4Parse.Compression;
@@ -33,6 +33,8 @@ namespace CUE4Parse.UE4.Pak.Objects
     public class FPakInfo
     {
         public const uint PAK_FILE_MAGIC = 0x5A6F12E1;
+        public const uint PAK_FILE_MAGIC_OutlastTrials = 0xA590ED1E;
+        public const uint PAK_FILE_MAGIC_TorchlightInfinite = 0x6B2A56B8;
         public const int COMPRESSION_METHOD_NAME_LEN = 32;
 
         public readonly uint Magic;
@@ -51,7 +53,7 @@ namespace CUE4Parse.UE4.Pak.Objects
         private FPakInfo(FArchive Ar, OffsetsToTry offsetToTry)
         {
             var hottaVersion = 0u;
-            if (offsetToTry == OffsetsToTry.SizeHotta)
+            if (Ar.Game == EGame.GAME_TowerOfFantasy && offsetToTry == OffsetsToTry.SizeHotta)
             {
                 hottaVersion = Ar.Read<uint>();
                 // Dirty way to keep backwards compatibility
@@ -62,6 +64,8 @@ namespace CUE4Parse.UE4.Pak.Objects
                 }
             }
 
+            if (Ar.Game == EGame.GAME_TorchlightInfinite) Ar.Position += 3;
+
             // New FPakInfo fields.
             EncryptionKeyGuid = Ar.Read<FGuid>();          // PakFile_Version_EncryptionKeyGuid
             EncryptedIndex = Ar.Read<byte>() != 0;         // Do not replace by ReadFlag
@@ -70,15 +74,31 @@ namespace CUE4Parse.UE4.Pak.Objects
             Magic = Ar.Read<uint>();
             if (Magic != PAK_FILE_MAGIC)
             {
+                if (Ar.Game == EGame.GAME_OutlastTrials && Magic == PAK_FILE_MAGIC_OutlastTrials ||
+                    Ar.Game == EGame.GAME_TorchlightInfinite && Magic == PAK_FILE_MAGIC_TorchlightInfinite) goto afterMagic;
                 // Stop immediately when magic is wrong
                 return;
             }
 
+            afterMagic:
             Version = hottaVersion >= 2 ? (EPakFileVersion) (Ar.Read<int>() ^ 2) : Ar.Read<EPakFileVersion>();
+            if (Ar.Game == EGame.GAME_StateOfDecay2)
+            {
+                // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
+                Version &= (EPakFileVersion) 0xFFFF;
+            }
+
             IsSubVersion = Version == EPakFileVersion.PakFile_Version_FNameBasedCompressionMethod && offsetToTry == OffsetsToTry.Size8a;
+            if (Ar.Game == EGame.GAME_TorchlightInfinite) Ar.Position += 1;
             IndexOffset = Ar.Read<long>();
+            if (Ar.Game == EGame.GAME_Snowbreak) IndexOffset ^= 0x1C1D1E1F;
             IndexSize = Ar.Read<long>();
             IndexHash = new FSHAHash(Ar);
+
+            if (Ar.Game == EGame.GAME_MeetYourMaker && offsetToTry == OffsetsToTry.SizeHotta && Version >= EPakFileVersion.PakFile_Version_Latest)
+            {
+                var mymVersion = Ar.Read<uint>(); // I assume this is a version, only 0 right now.
+            }
 
             if (Version == EPakFileVersion.PakFile_Version_FrozenIndex)
             {
@@ -89,7 +109,7 @@ namespace CUE4Parse.UE4.Pak.Objects
             {
                 CompressionMethods = new List<CompressionMethod>
                 {
-                    CompressionMethod.None, CompressionMethod.Zlib, CompressionMethod.Gzip, CompressionMethod.Oodle, CompressionMethod.LZ4
+                    CompressionMethod.None, CompressionMethod.Zlib, CompressionMethod.Gzip, CompressionMethod.Oodle, CompressionMethod.LZ4, CompressionMethod.Zstd
                 };
             }
             else
@@ -193,13 +213,16 @@ namespace CUE4Parse.UE4.Pak.Objects
 
                 var offsetsToTry = Ar.Game switch
                 {
-                    EGame.GAME_TowerOfFantasy => new[] { OffsetsToTry.SizeHotta },
+                    EGame.GAME_TowerOfFantasy or EGame.GAME_MeetYourMaker or EGame.GAME_TorchlightInfinite => new [] { OffsetsToTry.SizeHotta },
                     _ => _offsetsToTry
                 };
                 foreach (var offset in offsetsToTry)
                 {
-                    reader.Seek(-(long)offset, SeekOrigin.End);
+                    reader.Seek(-(long) offset, SeekOrigin.End);
                     var info = new FPakInfo(reader, offset);
+
+                    if (Ar.Game == EGame.GAME_OutlastTrials && info.Magic == PAK_FILE_MAGIC_OutlastTrials ||
+                        Ar.Game == EGame.GAME_TorchlightInfinite && info.Magic == PAK_FILE_MAGIC_TorchlightInfinite) return info;
                     if (info.Magic == PAK_FILE_MAGIC)
                     {
                         return info;

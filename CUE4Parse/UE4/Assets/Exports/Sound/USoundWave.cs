@@ -7,9 +7,16 @@ using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Assets.Exports.Sound
 {
+    public enum ESoundWaveFlag : uint
+    {
+        CookedFlag					= 1 << 0,
+        HasOwnerLoadingBehaviorFlag	= 1 << 1,
+        LoadingBehaviorShift		= 2,
+        LoadingBehaviorMask			= 0b00000111,
+    }
+
     public class USoundWave : USoundBase
     {
-        public bool bCooked { get; private set; }
         public bool bStreaming { get; private set; } = true;
         public FFormatContainer? CompressedFormatData { get; private set; }
         public FByteBulkData? RawData { get; private set; }
@@ -19,22 +26,26 @@ namespace CUE4Parse.UE4.Assets.Exports.Sound
         public override void Deserialize(FAssetArchive Ar, long validPos)
         {
             base.Deserialize(Ar, validPos);
-            bStreaming = Ar.Game >= EGame.GAME_UE4_25 && Ar.Game != EGame.GAME_GTATheTrilogyDefinitiveEdition && Ar.Game != EGame.GAME_ReadyOrNot;
+            bStreaming = Ar.Versions["SoundWave.UseAudioStreaming"];
             if (TryGetValue(out bool s, nameof(bStreaming))) // will return false if not found
                 bStreaming = s;
             else if (TryGetValue(out FName loadingBehavior, "LoadingBehavior"))
                 bStreaming = !loadingBehavior.IsNone && loadingBehavior.Text != "ESoundWaveLoadingBehavior::ForceInline";
 
-            bCooked = Ar.ReadBoolean();
-
+            var flags = Ar.Read<ESoundWaveFlag>();
             if (Ar.Ver >= EUnrealEngineObjectUE4Version.SOUND_COMPRESSION_TYPE_ADDED && FFrameworkObjectVersion.Get(Ar) < FFrameworkObjectVersion.Type.RemoveSoundWaveCompressionName)
             {
                 Ar.ReadFName(); // DummyCompressionName
             }
 
+            if (Ar.Game >= EGame.GAME_UE5_4 && flags.HasFlag(ESoundWaveFlag.CookedFlag))
+            {
+                Ar.ReadArray(Ar.ReadFString); // PlatformCuePoints
+            }
+
             if (!bStreaming)
             {
-                if (bCooked)
+                if (flags.HasFlag(ESoundWaveFlag.CookedFlag))
                 {
                     CompressedFormatData = new FFormatContainer(Ar);
                 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -46,6 +47,22 @@ namespace CUE4Parse.UE4.Objects.Core.Math
             Y = y;
             Z = z;
             W = w;
+        }
+
+        public FQuat(TIntVector4<float> quat)
+        {
+            X = quat.X;
+            Y = quat.Y;
+            Z = quat.Z;
+            W = quat.W;
+        }
+
+        public FQuat(TIntVector4<double> quat)
+        {
+            X = (float) quat.X;
+            Y = (float) quat.Y;
+            Z = (float) quat.Z;
+            W = (float) quat.W;
         }
 
         public FQuat(FArchive Ar)
@@ -157,6 +174,7 @@ namespace CUE4Parse.UE4.Objects.Core.Math
                                                         (Abs(X + q.X) <= tolerance && Abs(Y + q.Y) <= tolerance && Abs(Z + q.Z) <= tolerance && Abs(W + q.W) <= tolerance);
 
         public bool IsIdentity(float tolerance = UnrealMath.SmallNumber) => Equals(Identity, tolerance);
+        public bool IsVectorZero() => X == 0 && Y == 0 && Z == 0;
 
         public static Vector128<float> AsVector128(FQuat value)
         {
@@ -203,7 +221,7 @@ namespace CUE4Parse.UE4.Objects.Core.Math
         {
             var squareSum = X * X + Y * Y + Z * Z + W * W;
 
-            if (Abs(squareSum-1.0f) >= tolerance)
+            if (squareSum >= tolerance)
             {
                 var scale = squareSum.InvSqrt();
 
@@ -271,6 +289,33 @@ namespace CUE4Parse.UE4.Objects.Core.Math
         public static FQuat Conjugate(FQuat quat)
         {
             return new FQuat(-quat.X, -quat.Y, -quat.Z, quat.W);
+        }
+
+        public static FQuat FindBetweenNormals(FVector a, FVector b, float normAb = 1.0f)
+        {
+            float w = normAb + FVector.DotProduct(a, b);
+            FQuat result;
+
+            if (w >= 1e-6f * normAb)
+            {
+                //Axis = FVector::CrossProduct(A, B);
+                result = new FQuat(
+                    a.Y * b.Z - a.Z * b.Y,
+                    a.Z * b.X - a.X * b.Z,
+                    a.X * b.Y - a.Y * b.X,
+                    w);
+            }
+            else
+            {
+                // A and B point in opposite directions
+                w = 0.0f;
+                result = Abs(a.X) > Abs(a.Y)
+                    ? new FQuat(-a.Z, 0.0f, a.X, w)
+                    : new FQuat(0.0f, -a.Z, a.Y, w);
+            }
+
+            result.Normalize();
+            return result;
         }
 
         public FRotator Rotator()
@@ -381,5 +426,7 @@ namespace CUE4Parse.UE4.Objects.Core.Math
         public static float operator |(FQuat a, FQuat b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z + a.W * b.W;
         public static FQuat operator *(FQuat a, float scale) => new FQuat(scale * a.X, scale * a.Y, scale * a.Z, scale * a.W);
         public static FQuat operator +(FQuat a, FQuat b) => new FQuat(a.X + b.X, a.Y + b.Y, a.Z + b.Z, a.W + b.W);
+
+        public static implicit operator Quaternion(FQuat v) => new(v.X, v.Y, v.Z, v.W);
     }
 }

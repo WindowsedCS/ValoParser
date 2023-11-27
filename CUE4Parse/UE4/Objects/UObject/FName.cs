@@ -30,7 +30,7 @@ namespace CUE4Parse.UE4.Objects.UObject
 
         public readonly FNameComparisonMethod ComparisonMethod;
 
-        public FName(string name, int index = 0, int number = 0, FNameComparisonMethod compare = FNameComparisonMethod.Text)
+        public FName(string? name, int index = 0, int number = 0, FNameComparisonMethod compare = FNameComparisonMethod.Text)
         {
             _name = new FNameEntrySerialized(name);
             Index = index;
@@ -83,19 +83,5 @@ namespace CUE4Parse.UE4.Objects.UObject
         public int CompareTo(FName other) => string.Compare(Text, other.Text, StringComparison.OrdinalIgnoreCase);
 
         public override string ToString() => Text;
-    }
-
-    public class FNameConverter : JsonConverter<FName>
-    {
-        public override void WriteJson(JsonWriter writer, FName value, JsonSerializer serializer)
-        {
-            writer.WriteValue(value.Text);
-        }
-
-        public override FName ReadJson(JsonReader reader, Type objectType, FName existingValue, bool hasExistingValue,
-            JsonSerializer serializer)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

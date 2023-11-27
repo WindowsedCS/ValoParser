@@ -1,8 +1,12 @@
 using CUE4Parse.UE4.Assets.Readers;
+using CUE4Parse.UE4.Objects.UObject;
 using Newtonsoft.Json;
 
 namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
 {
+    public class UBaseBuildingStaticMeshComponent : UStaticMeshComponent
+    {}
+
     public class UStaticMeshComponent : UObject
     {
         public FStaticMeshComponentLODInfo[]? LODData;
@@ -11,6 +15,21 @@ namespace CUE4Parse.UE4.Assets.Exports.Component.StaticMesh
         {
             base.Deserialize(Ar, validPos);
             LODData = Ar.ReadArray(() => new FStaticMeshComponentLODInfo(Ar));
+        }
+
+        public FPackageIndex GetStaticMesh()
+        {
+            var mesh = new FPackageIndex();
+            var current = this;
+            while (true)
+            {
+                mesh = current.GetOrDefault("StaticMesh", new FPackageIndex());
+                if (!mesh.IsNull || current.Template == null)
+                    break;
+                current = current.Template.Load<UStaticMeshComponent>();
+            }
+
+            return mesh;
         }
 
         protected internal override void WriteJson(JsonWriter writer, JsonSerializer serializer)

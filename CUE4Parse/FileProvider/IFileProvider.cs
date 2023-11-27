@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using CUE4Parse.FileProvider.Objects;
 using CUE4Parse.MappingsProvider;
 using CUE4Parse.UE4.Assets;
 using CUE4Parse.UE4.Assets.Exports;
@@ -69,7 +70,7 @@ namespace CUE4Parse.FileProvider
         /// This is fetched from the prefix before "Game/".
         /// If there was no file with "Game/" the root folder name is returned
         /// </summary>
-        public string GameName { get; }
+        public string InternalGameName { get; }
 
         /// <summary>
         /// Searches for a game file from this provider.
@@ -150,6 +151,7 @@ namespace CUE4Parse.FileProvider
         /// <param name="path">The file path</param>
         /// <returns>The reader if it could be created; null otherwise</returns>
         public Task<FArchive?> TryCreateReaderAsync(string path);
+
         /// <summary>
         /// Loads and parses a Package at the passed path.
         /// Can throw various exceptions
@@ -218,6 +220,7 @@ namespace CUE4Parse.FileProvider
         /// <param name="file">The package file</param>
         /// <returns>The parsed package content if it could be parsed; default otherwise</returns>
         public Task<IPackage?> TryLoadPackageAsync(GameFile file);
+
         /// <summary>
         /// Loads all parts of the Package at the passed path.
         /// Can throw various exceptions
@@ -323,12 +326,11 @@ namespace CUE4Parse.FileProvider
         /// <param name="objectPath">The object path</param>
         /// <returns>The loaded object if loaded successfully and of correct type; null otherwise</returns>
         public Task<T?> TryLoadObjectAsync<T>(string? objectPath) where T : UObject;
-
         /// <summary>
-        /// Loads an object from the Package at the passed path
+        /// Loads all objects from the Package at the passed path
         /// </summary>
-        /// <param name="objectPath">The object path</param>
-        /// <returns>All exports of the object</returns>
-        public IEnumerable<UObject> LoadObjectExports(string? objectPath);
+        /// <param name="packagePath">The package path</param>
+        /// <returns>All objects of the package</returns>
+        public IEnumerable<UObject> LoadAllObjects(string? packagePath);
     }
 }
