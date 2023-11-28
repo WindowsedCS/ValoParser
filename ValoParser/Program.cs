@@ -51,18 +51,27 @@ namespace ValoParser
 
             Console.WriteLine("Parsing Game Assets...");
 
-            VersionParser VersionParser = new VersionParser();
+            VersionParser VersionParser = new();
             VersionParser.GetVersionContent(gameDirectory, riotClientDir);
 
-            LocresParser LocresParser = new LocresParser();
+            LocresParser LocresParser = new();
             LocresParser.getLocresContent();
 
-            AgentsParser AgentsParser = new AgentsParser();
+            AgentsParser AgentsParser = new();
             AgentsParser.getAgentsContent();
+
+            CeremoniesParser CeremoniesParser = new();
+            CeremoniesParser.getCeremoniesContent();
+
+            ContentTiersParser ContentTiersParser = new();
+            ContentTiersParser.getContentTiersContent();
 
             foreach (var locale in LocresParser.AvailableLocres)
             {
-                AgentsParser.Localization(locale.ToString());
+                string localeStr = locale.ToString();
+                AgentsParser.Localization(localeStr);
+                CeremoniesParser.Localization(localeStr);
+                ContentTiersParser.Localization(localeStr);
             }
         }
     }
