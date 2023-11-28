@@ -40,8 +40,9 @@ namespace ValoParser
 
         public static async Task Main(string[] args)
         {
-            string gameDirectory = args.Length > 0 ? args[0] : "C:\\Riot Games\\VALORANT\\live";
-            string riotClientDir = args.Length > 1 ? args[1] : "C:\\Riot Games\\Riot Client";
+            // string gameDirectory = args.Length > 0 ? args[0] : "C:\\Riot Games\\VALORANT\\live";
+            string gameDirectory = args.Length > 0 ? args[0] : "E:\\ManifestRmanTest\\valorant";
+            string riotClientDir = args.Length > 1 ? args[1] : "E:\\ManifestRmanTest\\riotclient";
 
             provider = new(gameDirectory, SearchOption.AllDirectories, true, new VersionContainer(EGame.GAME_Valorant));
 
@@ -68,7 +69,8 @@ namespace ValoParser
 
             foreach (var locale in LocresParser.AvailableLocres)
             {
-                string localeStr = locale.ToString();
+                string localeStr = provider.GetLanguageCode(locale);
+                provider.LoadLocalization(locale);
                 AgentsParser.Localization(localeStr);
                 CeremoniesParser.Localization(localeStr);
                 ContentTiersParser.Localization(localeStr);

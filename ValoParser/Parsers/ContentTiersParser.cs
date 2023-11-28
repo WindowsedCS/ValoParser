@@ -82,7 +82,7 @@ namespace ValoParser.Parsers
                         {
                             { "TableId", UIDataProperties["DisplayName"]["Namespace"].ToString() },
                             { "Key", UIDataProperties["DisplayName"]["Key"].ToString() },
-                            { "Default", UIDataProperties["DisplayName"]["LocalizedString"].ToString() }
+                            { "Default", UIDataProperties["DisplayName"]["SourceString"].ToString() }
                         };
                         json.Add("displayName", DisplayName);
 
@@ -91,7 +91,7 @@ namespace ValoParser.Parsers
                         {
                             { "TableId", UIDataProperties["DisplayName"]["Namespace"].ToString() },
                             { "Key", UIDataProperties["DisplayNameAllCaps"]["Key"].ToString() },
-                            { "Default", UIDataProperties["DisplayNameAllCaps"]["LocalizedString"].ToString() }
+                            { "Default", UIDataProperties["DisplayNameAllCaps"]["SourceString"].ToString() }
                         };
                         json.Add("displayNameAllCaps", DisplayNameAllCaps);
 
@@ -100,7 +100,7 @@ namespace ValoParser.Parsers
                         {
                             { "TableId", UIDataProperties["DisplayName"]["Namespace"].ToString() },
                             { "Key", UIDataProperties["DisplayNameAbbreviatedAllCaps"]["Key"].ToString() },
-                            { "Default", UIDataProperties["DisplayNameAbbreviatedAllCaps"]["LocalizedString"].ToString() }
+                            { "Default", UIDataProperties["DisplayNameAbbreviatedAllCaps"]["SourceString"].ToString() }
                         };
                         json.Add("displayNameAbbreviatedAllCaps", DisplayNameAbbreviatedAllCaps);
                     }
@@ -119,29 +119,38 @@ namespace ValoParser.Parsers
 
         public void Localization(string locale)
         {
-            JsonArray LocalizedArray = array;
+            JsonArray LocalizedArray = JsonNode.Parse(array.ToJsonString()).AsArray();
             Parallel.ForEach(LocalizedArray, ceremony =>
             {
+                // DisplayName
                 if (ceremony["displayName"]["TableId"].ToString() != "")
                 {
-                    // DisplayName
                     ceremony["displayName"] = Program.provider.GetLocalizedString(ceremony["displayName"]["TableId"].ToString(), ceremony["displayName"]["Key"].ToString(), ceremony["displayName"]["Default"].ToString());
-
-                    // DisplayNameAllCaps
-                    ceremony["displayNameAllCaps"] = Program.provider.GetLocalizedString(ceremony["displayNameAllCaps"]["TableId"].ToString(), ceremony["displayNameAllCaps"]["Key"].ToString(), ceremony["displayNameAllCaps"]["Default"].ToString());
-
-                    // DisplayNameAbbreviatedAllCaps
-                    ceremony["displayNameAbbreviatedAllCaps"] = Program.provider.GetLocalizedString(ceremony["displayNameAbbreviatedAllCaps"]["TableId"].ToString(), ceremony["displayNameAbbreviatedAllCaps"]["Key"].ToString(), ceremony["displayNameAbbreviatedAllCaps"]["Default"].ToString());
-                } else
+                } 
+                else
                 {
-                    // DisplayName
-                    ceremony["displayName"] = ceremony["displayName"]["Default"].ToString();
+                    Console.WriteLine(1);
+                    ceremony["displayName"] = Program.provider.GetLocalizedString("\"\"", ceremony["displayName"]["Key"].ToString(), ceremony["displayName"]["Default"].ToString());
+                }
 
-                    // DisplayNameAllCaps
-                    ceremony["displayNameAllCaps"] = ceremony["displayNameAllCaps"]["Default"].ToString();
+                // DisplayNameAllCaps
+                if (ceremony["displayNameAllCaps"]["TableId"].ToString() != "")
+                {
+                    ceremony["displayNameAllCaps"] = Program.provider.GetLocalizedString(ceremony["displayNameAllCaps"]["TableId"].ToString(), ceremony["displayNameAllCaps"]["Key"].ToString(), ceremony["displayNameAllCaps"]["Default"].ToString());
+                }
+                else
+                {
+                    ceremony["displayNameAllCaps"] = Program.provider.GetLocalizedString("\"\"", ceremony["displayNameAllCaps"]["Key"].ToString(), ceremony["displayNameAllCaps"]["Default"].ToString());
+                }
 
-                    // DisplayNameAbbreviatedAllCaps
-                    ceremony["displayNameAbbreviatedAllCaps"] = ceremony["displayNameAbbreviatedAllCaps"]["Default"].ToString();
+                // DisplayNameAbbreviatedAllCaps
+                if (ceremony["displayNameAbbreviatedAllCaps"]["TableId"].ToString() != "")
+                {
+                    ceremony["displayNameAbbreviatedAllCaps"] = Program.provider.GetLocalizedString(ceremony["displayNameAbbreviatedAllCaps"]["TableId"].ToString(), ceremony["displayNameAbbreviatedAllCaps"]["Key"].ToString(), ceremony["displayNameAbbreviatedAllCaps"]["Default"].ToString());
+                }
+                else
+                {
+                    ceremony["displayNameAbbreviatedAllCaps"] = Program.provider.GetLocalizedString("\"\"", ceremony["displayNameAbbreviatedAllCaps"]["Key"].ToString(), ceremony["displayNameAbbreviatedAllCaps"]["Default"].ToString());
                 }
             });
             UassetUtil.exportJson(LocalizedArray, string.Format("data/contenttiers/{0}.json", locale));

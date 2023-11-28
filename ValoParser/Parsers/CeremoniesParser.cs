@@ -52,7 +52,7 @@ namespace ValoParser.Parsers
 
         public void Localization(string locale)
         {
-            JsonArray LocalizedArray = array;
+            JsonArray LocalizedArray = JsonNode.Parse(array.ToJsonString()).AsArray();
             Parallel.ForEach(LocalizedArray, ceremony =>
             {
                 // DisplayName

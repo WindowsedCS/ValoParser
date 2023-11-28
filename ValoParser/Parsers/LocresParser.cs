@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CUE4Parse.UE4.Versions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,11 +15,11 @@ namespace ValoParser.Parsers
     {
         public LocresParser() { }
 
-        public JsonArray AvailableLocres = new JsonArray();
+        public static List<ELanguage> AvailableLocres = new List<ELanguage>();
 
         public void getLocresContent()
         {
-            Parallel.ForEach(Program.provider.Files.Values, file =>
+            foreach (var file in Program.provider.Files.Values.ToList())
             {
                 if (file.Path.StartsWith("ShooterGame/Content/Localization/Game") && file.Path.EndsWith(".locres"))
                 {
@@ -31,11 +32,11 @@ namespace ValoParser.Parsers
                             Program.provider.LoadLocalization(code);
                             JsonNode json = JsonNode.Parse(JsonConvert.SerializeObject(Program.provider.LocalizedResources).ToString());
                             UassetUtil.exportJson(json, string.Format("data/locres/{0}.json", locale));
-                            AvailableLocres.Add(locale);
+                            AvailableLocres.Add(code);
                         }
                     });
                 }
-            });
+            }
         }
     }
 }
