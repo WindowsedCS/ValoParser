@@ -6,10 +6,8 @@ using SkiaSharp;
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 
 namespace ValoParser.Utils
 {

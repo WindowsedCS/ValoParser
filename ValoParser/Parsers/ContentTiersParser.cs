@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ValoParser.Utils;
 
@@ -129,7 +127,6 @@ namespace ValoParser.Parsers
                 } 
                 else
                 {
-                    Console.WriteLine(1);
                     ceremony["displayName"] = Program.provider.GetLocalizedString("\"\"", ceremony["displayName"]["Key"].ToString(), ceremony["displayName"]["Default"].ToString());
                 }
 

@@ -41,6 +41,7 @@ namespace ValoParser
         public static async Task Main(string[] args)
         {
             // string gameDirectory = args.Length > 0 ? args[0] : "C:\\Riot Games\\VALORANT\\live";
+            // string riotClientDir = args.Length > 1 ? args[1] : "E:\\Riot Games\\Riot Client";
             string gameDirectory = args.Length > 0 ? args[0] : "E:\\ManifestRmanTest\\valorant";
             string riotClientDir = args.Length > 1 ? args[1] : "E:\\ManifestRmanTest\\riotclient";
 
