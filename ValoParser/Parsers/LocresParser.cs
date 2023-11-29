@@ -11,7 +11,7 @@ namespace ValoParser.Parsers
     {
         public LocresParser() { }
 
-        public static List<ELanguage> AvailableLocres = new List<ELanguage>();
+        public List<ELanguage> AvailableLocres = new List<ELanguage>();
 
         public void getLocresContent()
         {

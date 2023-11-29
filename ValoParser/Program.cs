@@ -38,7 +38,7 @@ namespace ValoParser
             ELanguage.TraditionalChinese,
         };
 
-        public static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
             // string gameDirectory = args.Length > 0 ? args[0] : "C:\\Riot Games\\VALORANT\\live";
             // string riotClientDir = args.Length > 1 ? args[1] : "E:\\Riot Games\\Riot Client";
@@ -53,28 +53,40 @@ namespace ValoParser
 
             Console.WriteLine("Parsing Game Assets...");
 
-            VersionParser VersionParser = new();
-            VersionParser.GetVersionContent(gameDirectory, riotClientDir);
+            VersionParser versionParser = new();
+            versionParser.GetVersionContent(gameDirectory, riotClientDir);
 
-            LocresParser LocresParser = new();
-            LocresParser.getLocresContent();
+            LocresParser locresParser = new();
+            locresParser.getLocresContent();
 
-            AgentsParser AgentsParser = new();
-            AgentsParser.getAgentsContent();
+            AgentsParser agentsParser = new();
+            agentsParser.getAgentsContent();
 
-            CeremoniesParser CeremoniesParser = new();
-            CeremoniesParser.getCeremoniesContent();
+            CeremoniesParser veremoniesParser = new();
+            veremoniesParser.getCeremoniesContent();
 
-            ContentTiersParser ContentTiersParser = new();
-            ContentTiersParser.getContentTiersContent();
+            ContentTiersParser contentTiersParser = new();
+            contentTiersParser.getContentTiersContent();
 
-            foreach (var locale in LocresParser.AvailableLocres)
+            CurrenciesParser currenciesParser = new();
+            currenciesParser.getCurrenciesContent();
+
+            LevelBordersParser levelBordersParser = new();
+            levelBordersParser.getLevelBordersContent();
+
+            PlayerTitlesParser playerTitlesParser = new();
+            playerTitlesParser.getPlayerTitlesContent();
+
+            foreach (var locale in locresParser.AvailableLocres)
             {
                 string localeStr = provider.GetLanguageCode(locale);
                 provider.LoadLocalization(locale);
-                AgentsParser.Localization(localeStr);
-                CeremoniesParser.Localization(localeStr);
-                ContentTiersParser.Localization(localeStr);
+                agentsParser.Localization(localeStr);
+                veremoniesParser.Localization(localeStr);
+                contentTiersParser.Localization(localeStr);
+                currenciesParser.Localization(localeStr);
+                levelBordersParser.Localization(localeStr);
+                playerTitlesParser.Localization(localeStr);
             }
         }
     }
