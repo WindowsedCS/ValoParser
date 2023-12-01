@@ -39,6 +39,9 @@ namespace ValoParser.Parsers
                             { "Default", Strings["StringTable"]["KeysToMetaData"][PrimaryAssetProperties["TitleText"]["Key"].ToString()].ToString() }
                         };
                         json.Add("titleText", TitleText);
+                    } else
+                    {
+                        json.Add("titleText", null);
                     }
 
                     // TitleTextAllCaps
@@ -52,6 +55,9 @@ namespace ValoParser.Parsers
                             { "Default", Strings["StringTable"]["KeysToMetaData"][PrimaryAssetProperties["TitleTextAllCaps"]["Key"].ToString()].ToString() }
                         };
                         json.Add("titleTextAllCaps", TitleTextAllCaps);
+                    } else
+                    {
+                        json.Add("titleTextAllCaps", null);
                     }
 
                     if (PrimaryAssetProperties["bHideIfNotOwned"] != null)
@@ -77,6 +83,9 @@ namespace ValoParser.Parsers
                             { "Default", Strings["StringTable"]["KeysToMetaData"][UIDataProperties["DisplayName"]["Key"].ToString()].ToString() }
                         };
                         json.Add("displayName", DisplayName);
+                    } else
+                    {
+                        json.Add("displayName", null);
                     }
 
                     // DisplayNameAllCaps
@@ -90,6 +99,9 @@ namespace ValoParser.Parsers
                             { "Default", Strings["StringTable"]["KeysToMetaData"][UIDataProperties["DisplayNameAllCaps"]["Key"].ToString()].ToString() }
                         };
                         json.Add("displayNameAllCaps", DisplayNameAllCaps);
+                    } else
+                    {
+                        json.Add("displayNameAllCaps", null);
                     }
 
                     json.Add("assetPath", file.Path);

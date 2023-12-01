@@ -1,6 +1,6 @@
 ﻿namespace ValoParser.Utils
 {
-    internal class StringUtil
+    public class StringUtil
     {
         public static string uuidConvert(string uuid)
         {

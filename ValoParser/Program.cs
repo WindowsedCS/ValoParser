@@ -77,6 +77,9 @@ namespace ValoParser
             PlayerTitlesParser playerTitlesParser = new();
             playerTitlesParser.getPlayerTitlesContent();
 
+            ThemesParser themesParser = new();
+            themesParser.getThemesContent();
+
             foreach (var locale in locresParser.AvailableLocres)
             {
                 string localeStr = provider.GetLanguageCode(locale);
@@ -87,6 +90,7 @@ namespace ValoParser
                 currenciesParser.Localization(localeStr);
                 levelBordersParser.Localization(localeStr);
                 playerTitlesParser.Localization(localeStr);
+                themesParser.Localization(localeStr);
             }
         }
     }

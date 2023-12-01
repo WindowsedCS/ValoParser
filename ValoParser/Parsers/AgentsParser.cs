@@ -93,6 +93,9 @@ namespace ValoParser.Parsers
                         {
                             UassetUtil.exportImage(UIDataProperties["TopHUDPortrait"]["ObjectPath"].ToString().Split(".")[0], string.Format(Program.exportRoot + "/assets/agents/{0}/tophudportrait.png", uuid));
                             json.Add("topHUDPortrait", string.Format("https://assets.vallianty.com/agents/{0}/tophudportrait.png", uuid));
+                        } else
+                        {
+                            json.Add("topHUDPortrait", null);
                         }
 
                         // BackgroundGradientColors
@@ -164,6 +167,9 @@ namespace ValoParser.Parsers
                                 }
                                 UassetUtil.exportImage(iconPath, string.Format(Program.exportRoot + "/assets/agents/{0}/{1}.png", uuid, slot.Replace("ECharacterAbilitySlot::", "").ToLower()));
                                 Ability.Add("displayIcon", string.Format("https://assets.vallianty.com/agents/{0}/{1}.png", uuid, slot.Replace("ECharacterAbilitySlot::", "").ToLower()));
+                            } else
+                            {
+                                Ability.Add("displayIcon", null);
                             }
 
                             Abilities.Add(Ability);
