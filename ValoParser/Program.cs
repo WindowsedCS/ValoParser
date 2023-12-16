@@ -80,6 +80,12 @@ namespace ValoParser
             ThemesParser themesParser = new();
             themesParser.getThemesContent();
 
+            SeasonsParser seasonsParser = new();
+            seasonsParser.getSeasonsContent();
+
+            ContractsParser contractsParser = new();
+            contractsParser.getContractsContent();
+
             foreach (var locale in locresParser.AvailableLocres)
             {
                 string localeStr = provider.GetLanguageCode(locale);
@@ -91,6 +97,8 @@ namespace ValoParser
                 levelBordersParser.Localization(localeStr);
                 playerTitlesParser.Localization(localeStr);
                 themesParser.Localization(localeStr);
+                seasonsParser.Localization(localeStr);
+                contractsParser.Localization(localeStr);
             }
         }
     }

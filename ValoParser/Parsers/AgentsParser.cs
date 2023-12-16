@@ -14,7 +14,7 @@ namespace ValoParser.Parsers
         {
             Parallel.ForEach(Program.provider.Files.Values, file =>
             {
-                if (file.Path.StartsWith("ShooterGame/Content/Characters") && (file.Path.EndsWith("_PrimaryAsset.uasset") || file.Path.EndsWith("_BasePrimaryAsset.uasset")))
+                if (file.Path.StartsWith("ShooterGame/Content/Characters/") && (file.Path.EndsWith("_PrimaryAsset.uasset") || file.Path.EndsWith("_BasePrimaryAsset.uasset")))
                 {
                     if (file.Path.Split("/").Length == 5 && (file.Path.Split("/")[4] == string.Format("{0}_PrimaryAsset.uasset", file.Path.Split("/")[3]) || file.Path.Split("/")[4] == string.Format("{0}_BasePrimaryAsset.uasset", file.Path.Split("/")[3])))
                     {

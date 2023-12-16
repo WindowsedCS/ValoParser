@@ -17,7 +17,7 @@ namespace ValoParser.Parsers
         {
             foreach (var file in Program.provider.Files.Values.ToList())
             {
-                if (file.Path.StartsWith("ShooterGame/Content/Localization/Game") && file.Path.EndsWith(".locres"))
+                if (file.Path.StartsWith("ShooterGame/Content/Localization/Game/") && file.Path.EndsWith(".locres"))
                 {
                     string locale = file.Path.Split("/")[4];
 

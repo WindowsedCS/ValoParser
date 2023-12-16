@@ -1,20 +1,21 @@
-﻿using System.Text.Json.Nodes;
+﻿using System;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using ValoParser.Utils;
 
 namespace ValoParser.Parsers
 {
-    public class CeremoniesParser
+    public class SeasonsParser
     {
-        public CeremoniesParser() { }
+        public SeasonsParser() { }
 
         JsonArray array = new JsonArray();
 
-        public void getCeremoniesContent()
+        public void getSeasonsContent()
         {
             Parallel.ForEach(Program.provider.Files.Values, file =>
             {
-                if (file.Path.StartsWith("ShooterGame/Content/Ceremonies/") && file.Path.EndsWith("_PrimaryAsset.uasset"))
+                if (file.Path.StartsWith("ShooterGame/Content/Seasons/") && file.Path.EndsWith("_DataAsset.uasset") && file.Path.Split("/").Length == 4)
                 {
                     JsonObject json = new JsonObject();
 
@@ -25,6 +26,22 @@ namespace ValoParser.Parsers
                     // Uuid
                     string uuid = StringUtil.uuidConvert(PrimaryAssetProperties["Uuid"].ToString());
                     json.Add("uuid", uuid);
+
+                    // Type
+                    if (PrimaryAssetProperties["Type"] != null)
+                    {
+                        json.Add("type", PrimaryAssetProperties["Type"].ToString());
+                    }
+                    else
+                    {
+                        json.Add("type", null);
+                    }
+
+                    // StartTime
+                    json.Add("startTime", PrimaryAssetProperties["StartTime"]["Ticks"].ToJsonString());
+
+                    // EndTime
+                    json.Add("endTime", PrimaryAssetProperties["EndTime"]["Ticks"].ToJsonString());
 
                     // Package: UIData
                     JsonNode UIData = UassetUtil.loadFullJson(PrimaryAssetProperties["UIData"]["AssetPathName"].ToString().Split(".")[0]);
@@ -45,18 +62,18 @@ namespace ValoParser.Parsers
                     array.Add(json);
                 }
             });
-            UassetUtil.exportJson(array, string.Format("data/ceremonies/{0}.json", "raw"));
+            UassetUtil.exportJson(array, string.Format("data/seasons/{0}.json", "raw"));
         }
 
         public void Localization(string locale)
         {
             JsonArray LocalizedArray = JsonNode.Parse(array.ToJsonString()).AsArray();
-            Parallel.ForEach(LocalizedArray, ceremony =>
+            Parallel.ForEach(LocalizedArray, season =>
             {
                 // DisplayName
-                ceremony["displayName"] = Program.provider.GetLocalizedString(ceremony["displayName"]["TableId"].ToString(), ceremony["displayName"]["Key"].ToString(), ceremony["displayName"]["Default"].ToString());
+                season["displayName"] = Program.provider.GetLocalizedString(season["displayName"]["TableId"].ToString(), season["displayName"]["Key"].ToString(), season["displayName"]["Default"].ToString());
             });
-            UassetUtil.exportJson(LocalizedArray, string.Format("data/ceremonies/{0}.json", locale));
+            UassetUtil.exportJson(LocalizedArray, string.Format("data/seasons/{0}.json", locale));
         }
     }
 }

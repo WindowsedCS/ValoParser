@@ -14,7 +14,7 @@ namespace ValoParser.Parsers
         {
             Parallel.ForEach(Program.provider.Files.Values, file =>
             {
-                if (file.Path.StartsWith("ShooterGame/Content/Currencies") && file.Path.EndsWith("_DataAsset.uasset") && file.Path.Split("/")[3].StartsWith("Currency_"))
+                if (file.Path.StartsWith("ShooterGame/Content/Currencies/") && file.Path.EndsWith("_DataAsset.uasset") && file.Path.Split("/")[3].StartsWith("Currency_"))
                 {
                     JsonObject json = new JsonObject();
 
